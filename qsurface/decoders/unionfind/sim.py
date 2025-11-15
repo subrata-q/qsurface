@@ -477,17 +477,28 @@ class Toric(Sim):
         if leaf:
             key, (new_ancilla, edge) = leaf
             if ancilla.syndrome:
-                self.flip_edge(ancilla, edge, new_ancilla)
-                if type(key) is not int and not isinstance(ancilla, PseudoQubit):
-                    self.correct_edge(self.code.ancilla_qubits[self.code.decode_layer][ancilla.loc], key)
-                ancilla.peeled = self.code.instance
-                # Don't recurse to PseudoQubits - they'll be handled separately in Planar.peel_clusters
-                if not isinstance(new_ancilla, PseudoQubit):
+                # Special case: if the neighbor is a PseudoQubit, handle differently
+                # PseudoQubits are boundary elements and flipping creates artificial syndromes on them
+                if isinstance(new_ancilla, PseudoQubit):
+                    # Manually flip only the regular ancilla's syndrome and apply correction
+                    ancilla.syndrome = not ancilla.syndrome
+                    if type(key) is not int:
+                        self.correct_edge(self.code.ancilla_qubits[self.code.decode_layer][ancilla.loc], key)
+                    # Mark edge in matching (like flip_edge does)
+                    self.support[edge] = -2
+                    # Don't recurse to PseudoQubit - it will be handled in Planar.peel_clusters
+                else:
+                    # Normal case: flip both sides and recurse
+                    self.flip_edge(ancilla, edge, new_ancilla)
+                    if type(key) is not int:
+                        self.correct_edge(self.code.ancilla_qubits[self.code.decode_layer][ancilla.loc], key)
                     self.peel_leaf(cluster, new_ancilla)
+                ancilla.peeled = self.code.instance
             else:
                 self._edge_peel(edge, variant="peel")
                 ancilla.peeled = self.code.instance
-                # Don't recurse to PseudoQubits - they'll be handled separately in Planar.peel_clusters
+                # When we don't flip, skip recursion to PseudoQubits - they'll be
+                # handled separately in Planar.peel_clusters
                 if not isinstance(new_ancilla, PseudoQubit):
                     self.peel_leaf(cluster, new_ancilla)
 
