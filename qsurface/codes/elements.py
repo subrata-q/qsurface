@@ -22,7 +22,7 @@ class Qubit(ABC):
     def __init__(self, loc: Tuple[float, float], z: float = 0, *args, **kwargs):
         self.loc = loc
         self.z = z
-        self.errors = defaultdict(float)
+        self.errors: dict[str, float] = defaultdict(float)
 
     def __repr__(self):
         return f"{self.qubit_type}({self.loc[0]},{self.loc[1]}|{self.z})"
@@ -55,7 +55,9 @@ class DataQubit(Qubit):
         self.edges = {}
         self.reinitialized = True
 
-    def _reinitialize(self, initial_states: Tuple[float, float] = (None, None), **kwargs):
+    def _reinitialize(
+        self, initial_states: Tuple[float | None, float | None] = (None, None), **kwargs
+    ):
         """Resets this qubit's attributes."""
         self.reinitialized = True
         for edge, state in zip(self.edges.values(), initial_states):
@@ -120,8 +122,8 @@ class AncillaQubit(Qubit):
         self.state_type = state_type
         self.measured_state = False
         self.syndrome = False
-        self.parity_qubits = {}
-        self.z_neighbors = {}
+        self.parity_qubits: dict[Tuple[float, float], DataQubit] = {}
+        self.z_neighbors: dict[Tuple[float, float], AncillaQubit] = {}
         self.measurement_error = False
 
     @property
@@ -190,7 +192,7 @@ class Edge:
         # fixed parameters
         self.qubit = qubit
         self.state_type = state_type
-        self._nodes = []
+        self._nodes: list[AncillaQubit] = []
         self.state = random.random() > 0.5 if initial_state is None else initial_state
 
     def _reinitialize(self, initial_state: Optional[bool] = None, **kwargs):
@@ -208,14 +210,13 @@ class Edge:
 
     @nodes.setter
     def nodes(self, nodes: Tuple[AncillaQubit, AncillaQubit]):
-        self._nodes = nodes
+        self._nodes = list(nodes)
 
     def add_node(self, node: AncillaQubit, **kwargs):
         """Adds a node to the edge's ``self.nodes`` attribute."""
         if len(self._nodes) < 2:
             self._nodes.append(node)
-            if len(self._nodes) == 2:
-                self._nodes == tuple(self._nodes)
+            # No need to convert to tuple - keep as list
         else:
             raise ValueError(f"This edge already has two nodes: {self._nodes}")
 

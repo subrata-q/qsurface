@@ -5,7 +5,7 @@ from typing import Optional, Tuple
 
 import pptree
 
-from ...codes.elements import AncillaQubit
+from ...codes.elements import AncillaQubit, Edge
 
 
 class Node(ABC):
@@ -48,10 +48,10 @@ class Node(ABC):
         self.primer = primer
         primer.node = self
 
-        self.old_bound = []
-        self.new_bound = []
-        self.neighbors = []
-        self.root_list = []
+        self.old_bound: list[Tuple[AncillaQubit, Edge, AncillaQubit]] = []
+        self.new_bound: list[Tuple[AncillaQubit, Edge, AncillaQubit]] = []
+        self.neighbors: list[Tuple[Node, Edge]] = []
+        self.root_list: list[int] = []
         self.radius = 0
         self.parity = 0
         self.delay = 0

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ...codes.elements import AncillaQubit, PseudoQubit
+from ...codes.elements import AncillaQubit, Edge, PseudoQubit
 
 
 class Cluster:
@@ -42,8 +42,8 @@ class Cluster:
         self.support = 0
         self.parity = 0
         self.parent = self
-        self.bound = []
-        self.new_bound = []
+        self.bound: list[Tuple[AncillaQubit, Edge, AncillaQubit]] = []
+        self.new_bound: list[Tuple[AncillaQubit, Edge, AncillaQubit]] = []
         self.bucket = -1
         self.on_bound = False
 

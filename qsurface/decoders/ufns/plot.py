@@ -1,7 +1,9 @@
 from ...codes.elements import AncillaQubit, DataQubit, Edge
 from ..unionfind.plot import Planar as PlotPlanar
+from ..unionfind.plot import Rotated as PlotRotated
 from ..unionfind.plot import Toric as PlotToric
 from .sim import Planar as SimPlanar
+from .sim import Rotated as SimRotated
 from .sim import Toric as SimToric
 
 
@@ -47,6 +49,30 @@ class Planar(Toric, PlotPlanar, SimPlanar):
     """Union-Find Node-Suspension decoder for the planar lattice with union-find plot.
 
     Has all class attributes, methods, and nested figure classes from `.ufns.sim.Planar`, with additional parameters below. Default values for these parameters can be supplied via a *decoders.ini* file under the section of ``[ufns]`` (see `.decoders._template.read_config`).
+
+    The plotting class initiates a `qsurface.plot` object. For its usage, see :ref:`plot-usage`.
+
+    Parameters
+    ----------
+    step_bucket : bool, optional
+        Waits for user after every occupied bucket. Default is false.
+    step_cluster : bool, optional
+        Waits for user after growth of every cluster. Default is false.
+    step_node : bool, optional
+        Waits for user after growth of every node. Default is false.
+    step_cycle : bool, optional
+        Waits for user after every edge removed due to cycle detection. Default is false.
+    step_peel : bool, optional
+        Waits for user after every edge removed during peeling. Default is false.
+    """
+
+    pass
+
+
+class Rotated(Planar, PlotRotated, SimRotated):
+    """Union-Find Node-Suspension decoder for the rotated lattice with union-find plot.
+
+    Has all class attributes, methods, and nested figure classes from `.ufns.sim.Rotated`, with additional parameters below. Default values for these parameters can be supplied via a *decoders.ini* file under the section of ``[ufns]`` (see `.decoders._template.read_config`).
 
     The plotting class initiates a `qsurface.plot` object. For its usage, see :ref:`plot-usage`.
 

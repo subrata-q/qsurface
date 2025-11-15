@@ -360,14 +360,14 @@ class Template2D(ABC):
         self.params = plot_params if plot_params else PlotParams()
         self.figure = None
         self.main_ax = None
-        self.history_dict = defaultdict(dict)
+        self.history_dict: dict[int, dict[Artist, dict]] = defaultdict(dict)
         self.history_iters = 0
         self.history_iter = 0
-        self.history_iter_names = []
+        self.history_iter_names: list[str] = []
         self.history_event_iter = ""
-        self.future_dict = defaultdict(dict)
-        self.temporary_changes = defaultdict(dict)
-        self.temporary_saved = defaultdict(dict)
+        self.future_dict: dict[int, dict[Artist, dict]] = defaultdict(dict)
+        self.temporary_changes: dict[Artist, dict] = defaultdict(dict)
+        self.temporary_saved: dict[Artist, dict] = defaultdict(dict)
         self.shown_confirm_close = False
 
         self.figure = plt.figure(

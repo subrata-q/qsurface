@@ -341,3 +341,13 @@ class Planar(Toric, UFPlanar):
     """
 
     pass
+
+
+class Rotated(Planar):
+    """Union-Find Node-Suspension decoder for the rotated lattice.
+
+    Inherits from Planar as the rotated surface code uses the same
+    decoding algorithm.
+    """
+
+    pass
