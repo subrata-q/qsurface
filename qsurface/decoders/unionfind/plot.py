@@ -1,9 +1,10 @@
+
 from ...codes.elements import AncillaQubit, DataQubit, Edge
 from ...plot import Template2D, Template3D
 from .._template import Plot
-from .sim import Toric as SimToric, Planar as SimPlanar, Rotated as SimRotated
-from matplotlib.patches import Rectangle
-from matplotlib.lines import Line2D
+from .sim import Planar as SimPlanar
+from .sim import Rotated as SimRotated
+from .sim import Toric as SimToric
 
 
 class Toric(SimToric, Plot):
@@ -179,7 +180,10 @@ class Toric(SimToric, Plot):
                     color=self.params.color_z_primary,
                 ),
             ]
-            labels = [artist.get_label() if hasattr(artist, "get_label") else artist[0].get_label() for artist in handles]
+            labels = [
+                artist.get_label() if hasattr(artist, "get_label") else artist[0].get_label()
+                for artist in handles
+            ]
             self.legend_ax.legend(handles, labels, **kwargs.pop("uf_legend_kwargs", {}))
 
         def _plot_half_edge(
@@ -191,8 +195,12 @@ class Toric(SimToric, Plot):
         ):
             """Adds a line corresponding to a half-edge to the figure."""
             line = self._draw_line(
-                self.code._parse_boundary_coordinates(self.code.size[0], edge.qubit.loc[0], ancilla.loc[0]),
-                self.code._parse_boundary_coordinates(self.code.size[0], edge.qubit.loc[1], ancilla.loc[1]),
+                self.code._parse_boundary_coordinates(
+                    self.code.size[0], edge.qubit.loc[0], ancilla.loc[0]
+                ),
+                self.code._parse_boundary_coordinates(
+                    self.code.size[0], edge.qubit.loc[1], ancilla.loc[1]
+                ),
                 ls=self.params.line_style_primary if full else self.params.line_style_tertiary,
                 zorder=0,
                 lw=self.params.line_width_primary,
@@ -305,8 +313,12 @@ class Toric(SimToric, Plot):
                     edge_z = self.code.layers - edge.z
 
             line = self._draw_line3D(
-                self.code._parse_boundary_coordinates(self.code.size[0], edge.qubit.loc[0], ancilla.loc[0]),
-                self.code._parse_boundary_coordinates(self.code.size[0], edge.qubit.loc[1], ancilla.loc[1]),
+                self.code._parse_boundary_coordinates(
+                    self.code.size[0], edge.qubit.loc[0], ancilla.loc[0]
+                ),
+                self.code._parse_boundary_coordinates(
+                    self.code.size[0], edge.qubit.loc[1], ancilla.loc[1]
+                ),
                 (edge_z, ancilla.z),
                 ls=self.params.line_style_primary if full else self.params.line_style_tertiary,
                 zorder=0,
@@ -362,6 +374,7 @@ class Planar(Toric, SimPlanar):
         def _plot_ancilla(self, ancilla, **kwargs):
             if type(ancilla) == AncillaQubit:
                 super()._plot_ancilla(ancilla, **kwargs)
+
 
 class Rotated(Planar, SimRotated):
     def init_plot(self, **kwargs):

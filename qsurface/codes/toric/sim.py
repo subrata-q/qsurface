@@ -1,5 +1,6 @@
+from .._template.sim import FaultyMeasurements as TemplateFM
+from .._template.sim import PerfectMeasurements as TemplatePM
 from ..elements import AncillaQubit
-from .._template.sim import PerfectMeasurements as TemplatePM, FaultyMeasurements as TemplateFM
 
 
 class PerfectMeasurements(TemplatePM):
@@ -58,10 +59,22 @@ class PerfectMeasurements(TemplatePM):
     def init_logical_operator(self, **kwargs):
         """Initiates the logical operators [x1, x2, z1, z2] of the toric code."""
         operators = {
-            "x1": [self.data_qubits[self.decode_layer][(i, 0.5)].edges["x"] for i in range(self.size[0])],
-            "x2": [self.data_qubits[self.decode_layer][(0.5, i)].edges["x"] for i in range(self.size[1])],
-            "z1": [self.data_qubits[self.decode_layer][(i + 0.5, 0)].edges["z"] for i in range(self.size[0])],
-            "z2": [self.data_qubits[self.decode_layer][(0, i + 0.5)].edges["z"] for i in range(self.size[1])],
+            "x1": [
+                self.data_qubits[self.decode_layer][(i, 0.5)].edges["x"]
+                for i in range(self.size[0])
+            ],
+            "x2": [
+                self.data_qubits[self.decode_layer][(0.5, i)].edges["x"]
+                for i in range(self.size[1])
+            ],
+            "z1": [
+                self.data_qubits[self.decode_layer][(i + 0.5, 0)].edges["z"]
+                for i in range(self.size[0])
+            ],
+            "z2": [
+                self.data_qubits[self.decode_layer][(0, i + 0.5)].edges["z"]
+                for i in range(self.size[1])
+            ],
         }
         self.logical_operators = operators
 
@@ -74,7 +87,9 @@ class PerfectMeasurements(TemplatePM):
                 options[i] = [*args]
                 options[i][i] = size
         diff = {
-            option: sum([abs(args[i] - args[j]) for i in range(len(args)) for j in range(i + 1, len(args))])
+            option: sum(
+                [abs(args[i] - args[j]) for i in range(len(args)) for j in range(i + 1, len(args))]
+            )
             for option, args in options.items()
         }
         return options[min(diff, key=diff.get)]

@@ -1,8 +1,9 @@
 from __future__ import annotations
+
 from ...codes.elements import AncillaQubit, PseudoQubit
 
 
-class Cluster(object):
+class Cluster:
     """CLuster of `~.elements.AncillaQubit` objects.
 
     A disjoint set, or cluster, of ancilla-qubits. The size of the cluster is equal to the number of qubits in the cluster. The parity of the cluster is equal to the number of non-trivial ancilla-qubits in the cluster.
@@ -48,7 +49,7 @@ class Cluster(object):
 
     def __repr__(self):
         sep = "|" if self.on_bound else ":"
-        return "C{}({}{}{})".format(self.index, self.size, sep, self.parity)
+        return f"C{self.index}({self.size}{sep}{self.parity})"
 
     def __hash__(self):
         return self.index, self.instance

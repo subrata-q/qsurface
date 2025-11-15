@@ -1,5 +1,7 @@
-from qsurface.main import *
 import pytest
+
+from qsurface.main import *
+
 from .variables import *
 
 SEED = 12345
@@ -88,7 +90,9 @@ def test_run_multiprocess_benchmark():
     """Test multiprocess benchmark that combines multiple benchmarks."""
     code, decoder = initialize(SIZE_PM, CODES[0], DECODERS[0])
     benchmark = BenchmarkDecoder({"decode": ["count_calls", "value_to_list"]})
-    output = run_multiprocess(code, decoder, iterations=MP_ITERS, processes=2, benchmark=benchmark, seed=SEED)
+    output = run_multiprocess(
+        code, decoder, iterations=MP_ITERS, processes=2, benchmark=benchmark, seed=SEED
+    )
     asserted_output = {
         "no_error": MP_ITERS,
         "benchmark": {

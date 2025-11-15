@@ -1,8 +1,9 @@
-from qsurface.threshold import *
-import qsurface as oss
-import pytest
-import pandas as pd
 import matplotlib.pyplot as plt
+import pandas as pd
+import pytest
+
+from qsurface.threshold import *
+
 from .variables import *
 
 

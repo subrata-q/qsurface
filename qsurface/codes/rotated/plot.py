@@ -1,5 +1,7 @@
-from .sim import PerfectMeasurements as SimPM, FaultyMeasurements as SimFM
-from .._template.plot import PerfectMeasurements as TemplatePM, FaultyMeasurements as TemplateFM
+from .._template.plot import FaultyMeasurements as TemplateFM
+from .._template.plot import PerfectMeasurements as TemplatePM
+from .sim import FaultyMeasurements as SimFM
+from .sim import PerfectMeasurements as SimPM
 
 
 class PerfectMeasurements(SimPM, TemplatePM):

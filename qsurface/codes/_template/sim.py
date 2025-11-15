@@ -1,10 +1,11 @@
-from abc import ABC, abstractmethod
-import time
-from ..elements import DataQubit, AncillaQubit, PseudoQubit, Edge, PseudoEdge
-from ...errors._template import Sim as Error
-from typing import Any, List, Optional, Union, Tuple
-from collections import defaultdict
 import importlib
+import time
+from abc import ABC, abstractmethod
+from collections import defaultdict
+from typing import Any, List, Optional, Tuple, Union
+
+from ...errors._template import Sim as Error
+from ..elements import AncillaQubit, DataQubit, Edge, PseudoEdge, PseudoQubit
 
 
 class PerfectMeasurements(ABC):
@@ -161,7 +162,9 @@ class PerfectMeasurements(ABC):
         """
         for error_module in error_modules:
             if type(error_module) == str:
-                error_module = importlib.import_module(".errors.{}".format(error_module), package="qsurface")
+                error_module = importlib.import_module(
+                    f".errors.{error_module}", package="qsurface"
+                )
             self._init_error(error_module, error_rates)
 
     def _init_error(self, error_module, error_rates):
@@ -190,8 +193,12 @@ class PerfectMeasurements(ABC):
             Initial state for the data-qubit.
         """
         data_qubit = self._DataQubit(loc, z, **kwargs)
-        data_qubit.edges["x"] = self._Edge(data_qubit, "x", initial_state=initial_states[0], **kwargs)
-        data_qubit.edges["z"] = self._Edge(data_qubit, "z", initial_state=initial_states[1], **kwargs)
+        data_qubit.edges["x"] = self._Edge(
+            data_qubit, "x", initial_state=initial_states[0], **kwargs
+        )
+        data_qubit.edges["z"] = self._Edge(
+            data_qubit, "z", initial_state=initial_states[1], **kwargs
+        )
         self.data_qubits[z][loc] = data_qubit
         return data_qubit
 
@@ -251,7 +258,9 @@ class PerfectMeasurements(ABC):
     ----------------------------------------------------------------------------------------
     """
 
-    def random_errors(self, apply_order: Optional[List[str]] = None, measure: bool = True, **kwargs):
+    def random_errors(
+        self, apply_order: Optional[List[str]] = None, measure: bool = True, **kwargs
+    ):
         """Applies all errors loaded in ``self.errors`` attribute to layer ``z``.
 
         The random error is applied for each loaded error module by calling `~.errors._template.Sim.random_error`. If ``apply_order`` is specified, the error modules are applied in order of the error names in the list. If no order is specified, the errors are applied in a random order. Addionally, any error rate can set by supplying the rate as a keyword argument e.g. ``p_bitflip = 0.1``.
@@ -265,7 +274,9 @@ class PerfectMeasurements(ABC):
 
         """
         self.instance = time.time()
-        ordered_errors = [self.errors[name] for name in apply_order] if apply_order else self.errors.values()
+        ordered_errors = (
+            [self.errors[name] for name in apply_order] if apply_order else self.errors.values()
+        )
         for error_class in ordered_errors:
             for qubit in self.data_qubits[self.layer].values():
                 error_class.random_error(qubit, **kwargs)
@@ -316,7 +327,9 @@ class FaultyMeasurements(PerfectMeasurements):
         else:
             self.layers = max(size) if type(size) == tuple else size
         self.decode_layer = self.layers - 1
-        self.default_faulty_measurements = dict(p_bitflip_plaq=p_bitflip_plaq, p_bitflip_star=p_bitflip_star)
+        self.default_faulty_measurements = dict(
+            p_bitflip_plaq=p_bitflip_plaq, p_bitflip_star=p_bitflip_star
+        )
 
     """
     ----------------------------------------------------------------------------------------
@@ -393,7 +406,6 @@ class FaultyMeasurements(PerfectMeasurements):
         p_bitflip_star: Optional[float] = None,
         **kwargs,
     ):
-
         """Performs a round of parity measurements on layer `z` with faulty measurements.
 
         Parameters

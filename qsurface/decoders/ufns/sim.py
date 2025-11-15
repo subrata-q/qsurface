@@ -1,8 +1,10 @@
 from typing import List, Optional, Tuple
+
 from ...codes.elements import AncillaQubit, Edge
-from ..unionfind.sim import Toric as UFToric, Planar as UFPlanar
 from ..unionfind.elements import Cluster
-from .elements import Node, Syndrome, Junction, OddNode, print_tree
+from ..unionfind.sim import Planar as UFPlanar
+from ..unionfind.sim import Toric as UFToric
+from .elements import Junction, Node, OddNode, Syndrome, print_tree
 
 UL = List[Tuple[AncillaQubit, Edge, AncillaQubit]]
 
@@ -89,7 +91,7 @@ class Toric(UFToric):
         if parent:
             ancilla.node = parent.node
 
-        for (new_ancilla, edge) in self.get_neighbors(ancilla).values():
+        for new_ancilla, edge in self.get_neighbors(ancilla).values():
             if (
                 "erasure" in self.code.errors
                 and edge.qubit.erasure == self.code.instance
@@ -147,7 +149,7 @@ class Toric(UFToric):
         self.place_bucket(self.clusters, -1)
 
         if self.config["print_steps"]:
-            print(f"Found clusters:\n" + ", ".join(map(str, self.clusters)) + "\n")
+            print("Found clusters:\n" + ", ".join(map(str, self.clusters)) + "\n")
 
     """
     ================================================================================================
@@ -182,12 +184,13 @@ class Toric(UFToric):
         self.bucket_i = 0
 
         while self.bucket_i < self.buckets_num:
-
             if self.bucket_i > self.bucket_max_filled:
                 break
 
             if self.bucket_i in self.buckets and self.buckets[self.bucket_i] != []:
-                union_list, place_list = self.grow_bucket(self.buckets.pop(self.bucket_i), self.bucket_i)
+                union_list, place_list = self.grow_bucket(
+                    self.buckets.pop(self.bucket_i), self.bucket_i
+                )
                 self.union_bucket(union_list)
                 self.place_bucket(place_list, self.bucket_i)
 
@@ -228,7 +231,9 @@ class Toric(UFToric):
         if self.config["print_steps"]:
             print("")
 
-    def grow_node(self, cluster: Cluster, node: Node, union_list: UL, parent_node: Optional[Node] = None):
+    def grow_node(
+        self, cluster: Cluster, node: Node, union_list: UL, parent_node: Optional[Node] = None
+    ):
         """Recursive function that grows a ``node`` and its descendents.
 
         Grows the boundary list that is stored at the current node if there the current node is not suspended. The condition required is the following:
@@ -292,7 +297,6 @@ class Toric(UFToric):
             new_cluster = self.get_cluster(new_ancilla)
 
             if self.union_check(edge, ancilla, new_ancilla, cluster, new_cluster):
-
                 node, new_node = ancilla.node, new_ancilla.node
                 even = (cluster.parity + new_cluster.parity) % 2 == 0
 
@@ -317,7 +321,7 @@ class Toric(UFToric):
                 if not even:
                     root_node.root_list.append(calc_delay)
 
-                string = "{}∪{}=".format(cluster, new_cluster) if self.config["print_steps"] else ""
+                string = f"{cluster}∪{new_cluster}=" if self.config["print_steps"] else ""
                 if cluster.size < new_cluster.size:
                     cluster, new_cluster = new_cluster, cluster
                 cluster.union(new_cluster)

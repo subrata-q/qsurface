@@ -1,17 +1,79 @@
-from abc import ABC, abstractmethod
-from typing import Optional, Tuple, Union
+from abc import ABC
+from collections import defaultdict
 from dataclasses import dataclass
+from typing import Optional, Tuple, Union
+
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 from matplotlib.artist import Artist
 from matplotlib.lines import Line2D
-from matplotlib.widgets import Button
-from matplotlib.blocking_input import BlockingInput
 from matplotlib.patches import Circle, Rectangle
-from collections import defaultdict
-import tkinter
-import numpy as np
+from matplotlib.widgets import Button
+
+try:
+    import tkinter
+except ImportError:
+    tkinter = None  # type: ignore
 import os
+
+import numpy as np
+
+
+# Replacement for deprecated matplotlib.blocking_input.BlockingInput
+class BlockingInput:
+    """
+    Blocking base class for user input.
+
+    This is a replacement for the deprecated matplotlib.blocking_input.BlockingInput
+    class that was removed in matplotlib 3.6+.
+    """
+
+    def __init__(self, fig, eventslist=()):
+        self.fig = fig
+        self.eventslist = eventslist
+        self.events = []
+        self.callbacks = []
+
+    def on_event(self, event):
+        """Process an event."""
+        self.events.append(event)
+
+    def __call__(self, n=1, timeout=30):
+        """
+        Blocking call to retrieve n events.
+
+        Parameters
+        ----------
+        n : int
+            Number of events to collect
+        timeout : float
+            Timeout in seconds
+        """
+        self.events = []
+        self.callbacks = []
+
+        for event_name in self.eventslist:
+            cid = self.fig.canvas.mpl_connect(event_name, self.on_event)
+            self.callbacks.append(cid)
+
+        try:
+            # Use timer for timeout
+            if timeout > 0:
+                timer = self.fig.canvas.new_timer(interval=int(timeout * 1000))
+                timer.single_shot = True
+                timer.add_callback(lambda: self.fig.canvas.stop_event_loop())
+                timer.start()
+
+            while len(self.events) < n:
+                self.fig.canvas.start_event_loop(timeout=timeout)
+                if timeout > 0 and len(self.events) == 0:
+                    break
+
+        finally:
+            for cid in self.callbacks:
+                self.fig.canvas.mpl_disconnect(cid)
+
+        return self.events[:n] if self.events else []
 
 
 color_type = Union[str, Tuple[float, float, float, float]]
@@ -308,7 +370,9 @@ class Template2D(ABC):
         self.temporary_saved = defaultdict(dict)
         self.shown_confirm_close = False
 
-        self.figure = plt.figure(figsize=(self.params.scale_figure_length, self.params.scale_figure_height))
+        self.figure = plt.figure(
+            figsize=(self.params.scale_figure_length, self.params.scale_figure_height)
+        )
         self.canvas = self.figure.canvas
         # Init buttons and boxes
         self.legend_ax = plt.axes(self.params.axis_legend)
@@ -503,7 +567,7 @@ class Template2D(ABC):
                     wait = self._draw_prev()
                 elif event.key in [str(i) for i in range(10)]:
                     self.history_event_iter += event.key
-                    print("Go to iteration {} (press return).".format(self.history_event_iter))
+                    print(f"Go to iteration {self.history_event_iter} (press return).")
                 elif event.key == "n":
                     wait = self._draw_iteration(self.history_iters)
                 elif event.key == "i":
@@ -567,7 +631,7 @@ class Template2D(ABC):
             mew=self.params.legend_line_width,
             color=self.params.color_edge,
         )
-        scatter = plt.scatter([], [], s=8 ** 2, **kwargs)
+        scatter = plt.scatter([], [], s=8**2, **kwargs)
         return (line, scatter)
 
     def _draw_line(self, X: list, Y: list, *args, z: float = 0, **kwargs):
@@ -576,12 +640,14 @@ class Template2D(ABC):
         return artist
 
     def _draw_circle(self, xy: tuple, size: float, *args, z: float = 0, **kwargs):
-        artist = Circle(xy, size, *args, **kwargs)
+        artist = Circle(xy, size, **kwargs)
         self.main_ax.add_patch(artist)
         return artist
 
-    def _draw_rectangle(self, xy: tuple, size_x: float, size_y: float, *args, z: float = 0, **kwargs):
-        artist = Rectangle(xy, size_x, size_y, *args, **kwargs)
+    def _draw_rectangle(
+        self, xy: tuple, size_x: float, size_y: float, *args, z: float = 0, **kwargs
+    ):
+        artist = Rectangle(xy, size_x, size_y, **kwargs)
         self.main_ax.add_patch(artist)
         return artist
 
@@ -631,10 +697,12 @@ class Template2D(ABC):
                 self.history_iters += 1
                 self.history_iter += 1
             else:
-                print(f"Cannot add iteration {new_iter_name} to history, currently not on most recent iteration.")
+                print(
+                    f"Cannot add iteration {new_iter_name} to history, currently not on most recent iteration."
+                )
         if not (new_iter_name and self.history_at_newest):
             new_iter_name = self.history_iter_names[self.history_iter - 1]
-        text = "{}/{}: {}".format(self.history_iter, self.history_iters, new_iter_name)
+        text = f"{self.history_iter}/{self.history_iters}: {new_iter_name}"
         self.text.set_text(text)
 
         if output:
@@ -647,9 +715,12 @@ class Template2D(ABC):
             self.canvas.blit(self.main_ax.bbox)
             self.focus()
         else:
-            self.display(self.figure)
+            if hasattr(self, "display"):
+                self.display(self.figure)
 
-    def _draw_from_history(self, condition: bool, direction: int, draw: bool = True, **kwargs) -> bool:
+    def _draw_from_history(
+        self, condition: bool, direction: int, draw: bool = True, **kwargs
+    ) -> bool:
         """Move a single plot iteration forward or backwards.
 
         Draws all stored object properties of in either +1 or -1 `direction` in the history if the `condition` is met. If there are any properties stored in `self.temporary_changes`, these settings are first parsed and saved to the current and previous iterations.
@@ -755,7 +826,9 @@ class Template2D(ABC):
         if prop_dict:
             plt.setp(artist, **prop_dict)
 
-    def new_properties(self, artist: Artist, properties: dict, saved_properties: dict = {}, **kwargs):
+    def new_properties(
+        self, artist: Artist, properties: dict, saved_properties: dict = {}, **kwargs
+    ):
         """Parses a dictionary of property changes of a *matplotlib* artist.
 
         New properties are supplied via ``properties``. If any of the new properties is different from its current value, this is seen as a property change. The old property value is stored in ``self.history_dict[self.history_iteration]``, and the new property value is stored at ``self.history_dict[self.history_iteration+1]``. These new properties are *queued* for the next interation. The queue is emptied by applying all changes when `draw_figure` is called. If the same property changes 2+ times within the same iteration, the previous property change is removed with ``next_prop.pop(key, None)``.

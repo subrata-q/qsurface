@@ -1,8 +1,11 @@
 from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from typing import Optional, Tuple
-from ...codes.elements import AncillaQubit
+
 import pptree
+
+from ...codes.elements import AncillaQubit
 
 
 class Node(ABC):
@@ -42,7 +45,6 @@ class Node(ABC):
     short = "T"
 
     def __init__(self, primer: AncillaQubit):
-
         self.primer = primer
         primer.node = self
 
@@ -72,7 +74,9 @@ class Node(ABC):
         "Calculates and returns the parity of the current node."
         pass
 
-    def ns_delay(self, parent: Optional[Tuple[Node, int]] = None, min_delay: Optional[int] = None) -> int:
+    def ns_delay(
+        self, parent: Optional[Tuple[Node, int]] = None, min_delay: Optional[int] = None
+    ) -> int:
         """Calculates the node delay.
 
         Head recursive function that calculates the delays of the current node and all its descendent nodes.
@@ -93,7 +97,11 @@ class Node(ABC):
 
         if parent is not None:
             parent, edge = parent
-            self.delay = int(parent.delay + (self.radius / 2 - parent.radius / 2) % 1 - edge * (-1) ** self.parity)
+            self.delay = int(
+                parent.delay
+                + (self.radius / 2 - parent.radius / 2) % 1
+                - edge * (-1) ** self.parity
+            )
             if min_delay is None or (self.delay < min_delay):
                 min_delay = self.delay
 
@@ -119,7 +127,10 @@ class Syndrome(Node):
         parent_node
             Parent node in node-tree to indicate direction.
         """
-        self.parity = sum([1 - node.ns_parity(self) for node, _ in self.neighbors if node is not parent_node]) % 2
+        self.parity = (
+            sum([1 - node.ns_parity(self) for node, _ in self.neighbors if node is not parent_node])
+            % 2
+        )
         return self.parity
 
 
@@ -138,7 +149,10 @@ class Junction(Node):
         parent_node
             Parent node in node-tree to indicate direction.
         """
-        self.parity = 1 - (sum([1 - node.ns_parity(self) for node, _ in self.neighbors if node is not parent_node]) % 2)
+        self.parity = 1 - (
+            sum([1 - node.ns_parity(self) for node, _ in self.neighbors if node is not parent_node])
+            % 2
+        )
         return self.parity
 
 

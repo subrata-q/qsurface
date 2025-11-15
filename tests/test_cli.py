@@ -1,5 +1,7 @@
-from qsurface.__main__ import cli
 import pytest
+
+from qsurface.__main__ import cli
+
 from .variables import *
 
 ITERS = [1, 10]

@@ -1,7 +1,9 @@
-from ._template import Sim as TemplateSim, Plot as TemplatePlot
-from ..codes.elements import DataQubit
-from typing import Optional, Tuple
 import random
+from typing import Optional, Tuple
+
+from ..codes.elements import DataQubit
+from ._template import Plot as TemplatePlot
+from ._template import Sim as TemplateSim
 
 
 class Sim(TemplateSim):
@@ -15,7 +17,9 @@ class Sim(TemplateSim):
         Default state of the qubit after re-initialization.
     """
 
-    def __init__(self, *args, p_erasure: float = 0, initial_states: Tuple[float, float] = (0, 0), **kwargs):
+    def __init__(
+        self, *args, p_erasure: float = 0, initial_states: Tuple[float, float] = (0, 0), **kwargs
+    ):
         super().__init__(*args, **kwargs)
         self.initial_states = initial_states
         self.default_error_rates = {"p_erasure": p_erasure}
@@ -23,7 +27,13 @@ class Sim(TemplateSim):
         self.code._AncillaQubit.erasure = None
         # TODO above line is required for unionfind/ufns decoder, but doesn't make sense
 
-    def random_error(self, qubit, p_erasure: float = 0, initial_states: Optional[Tuple[float, float]] = None, **kwargs):
+    def random_error(
+        self,
+        qubit,
+        p_erasure: float = 0,
+        initial_states: Optional[Tuple[float, float]] = None,
+        **kwargs,
+    ):
         """Applies an erasure error.
 
         Parameters
@@ -40,10 +50,20 @@ class Sim(TemplateSim):
         if p_erasure != 0 and random.random() < p_erasure:
             if initial_states is None:
                 initial_states = self.initial_states
-            self.erasure(qubit, instance=getattr(self.code, "instance", 0), initial_states=initial_states, **kwargs)
+            self.erasure(
+                qubit,
+                instance=getattr(self.code, "instance", 0),
+                initial_states=initial_states,
+                **kwargs,
+            )
 
     @staticmethod
-    def erasure(qubit: DataQubit, instance: float = 0, initial_states: Tuple[float, float] = (0, 0), **kwargs):
+    def erasure(
+        qubit: DataQubit,
+        instance: float = 0,
+        initial_states: Tuple[float, float] = (0, 0),
+        **kwargs,
+    ):
         """Erases the ``qubit`` by resetting its attributes.
 
         Parameters
@@ -69,7 +89,7 @@ class Plot(TemplatePlot, Sim):
 
     legend_params = {
         "legend_erasure": {
-            "marker": "$\u25CC$",
+            "marker": "$\u25cc$",
             "color": "color_edge",
             "ms": "legend_marker_size",
             "mfc": "color_background",

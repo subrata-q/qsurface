@@ -1,2 +1,1 @@
-from . import sim
-from . import plot
+from . import plot, sim

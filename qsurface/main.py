@@ -1,19 +1,21 @@
 """
-Contains functions and classes to run and benchmark surface code simulations and visualizations. Use `initialize` to prepare a surface code and a decoder instance, which can be passed on to `run` and `run_multiprocess` to simulate errors and to decode them with the decoder. 
+Contains functions and classes to run and benchmark surface code simulations and visualizations. Use `initialize` to prepare a surface code and a decoder instance, which can be passed on to `run` and `run_multiprocess` to simulate errors and to decode them with the decoder.
 """
+
 from __future__ import annotations
-from types import ModuleType
-from typing import List, Optional, Tuple, Union
+
+import random
+import timeit
 from collections import defaultdict
 from functools import wraps
 from multiprocessing import Process, Queue, cpu_count
-import timeit
-import random
-import numpy
-from . import decoders
-from . import codes
-from .errors._template import Sim as Error
+from types import ModuleType
+from typing import List, Optional, Tuple, Union
 
+import numpy
+
+from . import codes, decoders
+from .errors._template import Sim as Error
 
 module_or_name = Union[ModuleType, str]
 size_type = Union[Tuple[int, int], int]
@@ -77,14 +79,16 @@ def initialize(
     """
     if isinstance(Code, str):
         Code = getattr(codes, Code)
-    Code_flow = getattr(Code, "plot") if plotting else getattr(Code, "sim")
+    Code_flow = Code.plot if plotting else Code.sim
     Code_flow_dim = (
-        getattr(Code_flow, "FaultyMeasurements") if faulty_measurements else getattr(Code_flow, "PerfectMeasurements")
+        Code_flow.FaultyMeasurements
+        if faulty_measurements
+        else Code_flow.PerfectMeasurements
     )
 
     if isinstance(Decoder, str):
         Decoder = getattr(decoders, Decoder)
-    Decoder_flow = getattr(Decoder, "plot") if plotting else getattr(Decoder, "sim")
+    Decoder_flow = Decoder.plot if plotting else Decoder.sim
     Decoder_flow_code = getattr(Decoder_flow, Code.__name__.split(".")[-1].capitalize())
 
     code = Code_flow_dim(size, **kwargs)
@@ -156,20 +160,20 @@ def run(
     random.seed(seed)
 
     if decode_initial:
-        print(f"Running initial iteration", end="\r")
+        print("Running initial iteration", end="\r")
         code.random_errors()
-        decoder.decode(**kwargs)    
+        decoder.decode(**kwargs)
         code.logical_state
         if hasattr(code, "figure"):
             code.show_corrected()
-            
+
     if benchmark:
         benchmark._set_decoder(decoder, seed=seed)
 
     output = {"no_error": 0}
 
     for iteration in range(iterations):
-        print(f"Running iteration {iteration+1}/{iterations}", end="\r")
+        print(f"Running iteration {iteration + 1}/{iterations}", end="\r")
         code.random_errors(**error_rates)
         decoder.decode(**kwargs)
         code.logical_state  # Must get logical state property to update code.no_error
@@ -317,7 +321,7 @@ def run_multiprocess(
     return output
 
 
-class BenchmarkDecoder(object):
+class BenchmarkDecoder:
     """Benchmarks a decoder during simulation.
 
     A benchmark of a decoder can be performed by attaching the current class to a ``decode``. A benchmarker will keep track of the number of simulated iterations and the number of successfull operations by the decoder in ``self.data``.
@@ -404,7 +408,9 @@ class BenchmarkDecoder(object):
     list_decorators = ["duration"]
     value_decorators = ["count_calls"]
 
-    def __init__(self, methods_to_benchmark: dict = {}, decoder: Optional[decoder_type] = None, **kwargs):
+    def __init__(
+        self, methods_to_benchmark: dict = {}, decoder: Optional[decoder_type] = None, **kwargs
+    ):
         self.decoder = decoder
         self.methods_to_benchmark = methods_to_benchmark
         self.data = {"decoded": 0, "iterations": 0, "seed": None}
@@ -419,7 +425,7 @@ class BenchmarkDecoder(object):
         self.data["seed"] = seed
 
         # Wrap decoder.decode for check for ancillas after decoding
-        decode = getattr(decoder, "decode")
+        decode = decoder.decode
 
         @wraps(decode)
         def wrapper(*args, **kwargs):
@@ -428,7 +434,7 @@ class BenchmarkDecoder(object):
             self.data["iterations"] += 1
             return result
 
-        setattr(decoder, "decode", wrapper)
+        decoder.decode = wrapper
 
         # Decorate decoder methods
         decorator_names = ["value_to_list"] + self.list_decorators + self.value_decorators
@@ -436,14 +442,16 @@ class BenchmarkDecoder(object):
             if isinstance(decorators, str):
                 decorators = [decorators]
 
-            attribute_names = handle_name.split('.')
+            attribute_names = handle_name.split(".")
             handle = decoder
             for i, attribute_name in enumerate(attribute_names):
                 owner = handle
                 if hasattr(owner, attribute_name):
                     handle = getattr(owner, attribute_name)
                 else:
-                    raise NameError(f"{attribute_name} is not a method of {decoder}.{attribute_names[:i]}")
+                    raise NameError(
+                        f"{attribute_name} is not a method of {decoder}.{attribute_names[:i]}"
+                    )
 
             for decorator in decorators:
                 if decorator not in decorator_names:
@@ -505,7 +513,9 @@ class BenchmarkDecoder(object):
         return wrapper
 
 
-def _combine_mean_std(means: List[float], stds: List[float], iterations: List[int]) -> Tuple[float, float]:
+def _combine_mean_std(
+    means: List[float], stds: List[float], iterations: List[int]
+) -> Tuple[float, float]:
     """Combines multiple groups of means and standard deviations.
 
     The algorithm utilizes the algorithm as described by `Cochrane <https://training.cochrane.org/handbook/current/chapter-06#section-6-5-2>`_. The method is valid since the each subgroup is the result returned by a multiprocessing process that simulations the same group.
@@ -522,10 +532,11 @@ def _combine_mean_std(means: List[float], stds: List[float], iterations: List[in
     m1, s1, n1 = means[0], stds[0], iterations[0]
 
     for m2, s2, n2 in zip(means[1:], stds[1:], iterations[1:]):
-
         n3 = n1 + n2
         m3 = (n1 * m1 + n2 * m2) / n3
-        s3 = ((n1 - 1) * s1 ** 2 + (n2 - 1) * s2 ** 2 + n1 * n2 / n3 * (m1 ** 2 + m2 ** 2 - 2 * m1 * m2)) / (n3 - 1)
+        s3 = (
+            (n1 - 1) * s1**2 + (n2 - 1) * s2**2 + n1 * n2 / n3 * (m1**2 + m2**2 - 2 * m1 * m2)
+        ) / (n3 - 1)
         m1, s1, n1 = m3, s3, n3
 
     return m1, s1

@@ -1,8 +1,9 @@
-from qsurface.main import BenchmarkDecoder, run, run_multiprocess, initialize
-from qsurface.threshold import run_many, ThresholdFit, read_csv
-from collections import defaultdict
 import argparse
 import sys
+from collections import defaultdict
+
+from qsurface.main import BenchmarkDecoder, initialize, run, run_multiprocess
+from qsurface.threshold import ThresholdFit, read_csv, run_many
 
 
 def _add_kwargs(parser, args, group_name=None, description=None):
@@ -26,7 +27,6 @@ def _get_kwargs(parsed_args, arg_group):
 
 
 def cli(args):
-
     parser = argparse.ArgumentParser(
         prog="qsurface",
         description="Simulation of surface codes. Need more information here",
@@ -122,7 +122,9 @@ def cli(args):
     _add_kwargs(simulation_parser, sim_arguments, "simulation", "arguments for simulation")
     _add_kwargs(simulation_parser, error_arguments, "errors", "arguments for errors")
 
-    sim_sub_parsers = simulation_parser.add_subparsers(help="sub-command help", dest="simulation_sub")
+    sim_sub_parsers = simulation_parser.add_subparsers(
+        help="sub-command help", dest="simulation_sub"
+    )
     sim_bench_parser = sim_sub_parsers.add_parser("benchmark", help="do benchmark")
     benchmark_arguments = [
         [
@@ -212,7 +214,9 @@ def cli(args):
     ]
     _add_kwargs(threshold_parser, thres_arguments, "simulation", "arguments for simulation")
     _add_kwargs(threshold_parser, thres_error_arguments, "errors", "arguments for errors")
-    thres_sub_parsers = threshold_parser.add_subparsers(help="sub-command help", dest="threshold_sub")
+    thres_sub_parsers = threshold_parser.add_subparsers(
+        help="sub-command help", dest="threshold_sub"
+    )
     thres_bench_parser = thres_sub_parsers.add_parser("benchmark", help="do benchmark")
     _add_kwargs(thres_bench_parser, benchmark_arguments)
 
@@ -222,7 +226,6 @@ def cli(args):
     init_kwargs = _get_kwargs(parsed_args, init_arguments)
 
     if parsed_args["sub"] == "simulation":
-
         error_rates = _get_kwargs(parsed_args, error_arguments)
         sim_kwargs = _get_kwargs(parsed_args, sim_arguments)
 
@@ -242,7 +245,6 @@ def cli(args):
         print(output)
 
     elif parsed_args["sub"] == "threshold":
-
         init_kwargs.pop("plotting")
         init_kwargs.update(_get_kwargs(parsed_args, thres_arguments))
         fit_column = init_kwargs.pop("fit_column")
@@ -258,7 +260,10 @@ def cli(args):
                 iterated_lists = list(map(list, zip(*error_lists.values())))
             except:
                 raise IndexError("Not all errors have the same length.")
-            error_rates = [{name: rate for name, rate in zip(error_lists.keys(), rates)} for rates in iterated_lists]
+            error_rates = [
+                {name: rate for name, rate in zip(error_lists.keys(), rates)}
+                for rates in iterated_lists
+            ]
 
             if parsed_args["threshold_sub"] == "benchmark":
                 bench_kwargs = _get_kwargs(parsed_args, benchmark_arguments)
@@ -274,7 +279,7 @@ def cli(args):
                 init_kwargs.pop("Decoder"),
                 error_rates=error_rates,
                 methods_to_benchmark=methods_to_benchmark,
-                **init_kwargs
+                **init_kwargs,
             )
 
         print(data)
@@ -288,6 +293,5 @@ def cli(args):
 
 
 if __name__ == "__main__":
-
     args = sys.argv
     cli(args[1:])

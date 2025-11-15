@@ -1,9 +1,11 @@
-from qsurface.main import *
-import qsurface as oss
-import pytest
 import random
-from .variables import *
 
+import pytest
+
+import qsurface as oss
+from qsurface.main import *
+
+from .variables import *
 
 ITERS = 100
 
@@ -27,11 +29,15 @@ def test_get_blossomv():
 def test_decoder_pm(size, Code, errors, faulty, max_rate, extra_keys):
     """Test initialize function for all configurations."""
 
-    Decoder_module = getattr(oss.decoders, "mwpm").sim
+    Decoder_module = oss.decoders.mwpm.sim
     if hasattr(Decoder_module, Code.capitalize()):
         decoder_module = getattr(Decoder_module, Code.capitalize())
         Code_module = getattr(oss.codes, Code).sim
-        code_module = getattr(Code_module, "FaultyMeasurements") if faulty else getattr(Code_module, "PerfectMeasurements")
+        code_module = (
+            Code_module.FaultyMeasurements
+            if faulty
+            else Code_module.PerfectMeasurements
+        )
         code = code_module(size)
         code.initialize(*errors)
         decoder = decoder_module(code)

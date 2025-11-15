@@ -1,11 +1,15 @@
 from typing import List, Optional
+
+import matplotlib.pyplot as plt
 from matplotlib.artist import Artist
 from matplotlib.lines import Line2D
-import matplotlib.pyplot as plt
 from matplotlib.widgets import RadioButtons
-from ...plot import Template2D as TemplatePlotPM, Template3D as TemplatePlotFM
-from .sim import PerfectMeasurements as TemplateSimPM, FaultyMeasurements as TemplateSimFM
-from ..elements import DataQubit, AncillaQubit
+
+from ...plot import Template2D as TemplatePlotPM
+from ...plot import Template3D as TemplatePlotFM
+from ..elements import AncillaQubit, DataQubit
+from .sim import FaultyMeasurements as TemplateSimFM
+from .sim import PerfectMeasurements as TemplateSimPM
 
 
 class PerfectMeasurements(TemplateSimPM):
@@ -203,7 +207,9 @@ class PerfectMeasurements(TemplateSimPM):
             for error in self.code.errors.values():
                 for param_name, name in error.legend_titles.items():
                     if param_name not in item_names:
-                        self.lh.append(self._legend_circle(name, **getattr(self.params, param_name)))
+                        self.lh.append(
+                            self._legend_circle(name, **getattr(self.params, param_name))
+                        )
                         item_names.append(name)
 
             self.lh += [
@@ -223,7 +229,10 @@ class PerfectMeasurements(TemplateSimPM):
                 ),
             ]
             self.lh += legend_items
-            labels = [artist.get_label() if hasattr(artist, "get_label") else artist[0].get_label() for artist in self.lh]
+            labels = [
+                artist.get_label() if hasattr(artist, "get_label") else artist[0].get_label()
+                for artist in self.lh
+            ]
             self.legend_ax.legend(handles=self.lh, labels=labels, **kwargs.get("legend_kwargs", {}))
 
         def _pick_handler(self, event):
@@ -274,8 +283,12 @@ class PerfectMeasurements(TemplateSimPM):
             qubit.surface_lines = {}
             for key, data in qubit.parity_qubits.items():
                 line = self._draw_line(
-                    self.code._parse_boundary_coordinates(self.code.size[0], qubit.loc[0], data.loc[0]),
-                    self.code._parse_boundary_coordinates(self.code.size[1], qubit.loc[1], data.loc[1]),
+                    self.code._parse_boundary_coordinates(
+                        self.code.size[0], qubit.loc[0], data.loc[0]
+                    ),
+                    self.code._parse_boundary_coordinates(
+                        self.code.size[1], qubit.loc[1], data.loc[1]
+                    ),
                     ls=linestyles[qubit.state_type],
                     zorder=0,
                     lw=self.params.line_width_primary,
@@ -365,7 +378,9 @@ class PerfectMeasurements(TemplateSimPM):
             qubit.surface_plot = circle
             circle.object = qubit  # Save qubit to artist
 
-        def _update_data(self, qubit: DataQubit, artist: Optional[Artist] = None, temporary=False, **kwargs):
+        def _update_data(
+            self, qubit: DataQubit, artist: Optional[Artist] = None, temporary=False, **kwargs
+        ):
             """Update properties of data qubit plot.
 
             Parameters
@@ -431,7 +446,9 @@ class FaultyMeasurements(PerfectMeasurements, TemplateSimFM):
     def plot_data(self, iter_name: Optional[str] = None, **kwargs):
         """Update plots of all data-qubits in ``self.layer``. A plot iteration is added if a ``iter_name`` is supplied. See `.plot.Template2D.draw_figure`."""
         for qubit in self.data_qubits[self.layer].values():
-            artist = qubit.surface_plot if self.figure3d else self.data_qubits[0][qubit.loc].surface_plot
+            artist = (
+                qubit.surface_plot if self.figure3d else self.data_qubits[0][qubit.loc].surface_plot
+            )
             self.figure._update_data(qubit, artist, **kwargs)
         if iter_name:
             self.figure.draw_figure(new_iter_name=iter_name)
@@ -439,7 +456,11 @@ class FaultyMeasurements(PerfectMeasurements, TemplateSimFM):
     def plot_ancilla(self, iter_name: Optional[str] = None, **kwargs):
         """Update plots of all ancilla-qubits in ``self.layer``. A plot iteration is added if a ``iter_name`` is supplied. See `.plot.Template2D.draw_figure`."""
         for qubit in self.ancilla_qubits[self.layer].values():
-            artist = qubit.surface_plot if self.figure3d else self.ancilla_qubits[0][qubit.loc].surface_plot
+            artist = (
+                qubit.surface_plot
+                if self.figure3d
+                else self.ancilla_qubits[0][qubit.loc].surface_plot
+            )
             self.figure._update_ancilla(qubit, artist)
         if iter_name:
             self.figure.draw_figure(new_iter_name=iter_name)

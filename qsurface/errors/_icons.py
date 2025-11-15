@@ -1,4 +1,4 @@
-from ..codes.elements import DataQubit, AncillaQubit
+from ..codes.elements import AncillaQubit, DataQubit
 
 
 def data_qubit_icon(qubit: DataQubit, instance: float = 0, show_erased: bool = False, **kwargs):

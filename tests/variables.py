@@ -1,6 +1,7 @@
+import itertools
+
 import qsurface as oss
 from qsurface.codes.toric.sim import PerfectMeasurements as toric_code
-import itertools
 
 CODES = oss.codes.CODES
 DECODERS = oss.decoders.DECODERS

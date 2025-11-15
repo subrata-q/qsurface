@@ -1,5 +1,6 @@
-from .sim import Toric as SimToric, Planar as SimPlanar
 from .._template import Plot
+from .sim import Planar as SimPlanar
+from .sim import Toric as SimToric
 
 
 class Toric(Plot, SimToric):

@@ -1,23 +1,26 @@
-from typing import Dict, List, Tuple, Union, Optional
-from types import ModuleType
+import sys
 from dataclasses import dataclass
-import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
-from matplotlib.figure import Figure
+from datetime import datetime
 from pathlib import Path
 from pprint import pprint
-from datetime import datetime
-from scipy import optimize
-import pandas as pd
-import numpy as np
-import sys
-from .main import initialize, run, run_multiprocess, BenchmarkDecoder
-from .errors._template import Sim as Error
+from types import ModuleType
+from typing import Dict, List, Optional, Tuple, Union
 
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from matplotlib.figure import Figure
+from matplotlib.lines import Line2D
+from scipy import optimize
+
+from .errors._template import Sim as Error
+from .main import BenchmarkDecoder, initialize, run, run_multiprocess
 
 module_or_name = Union[ModuleType, str]
 formatted_dataframe = Tuple[list, list, list, list]
-plt_markers = ["o", "s", "v", "D", "p", "^", "h", "X", "<", "P", "*", ">", "H", "d"] + [i + 4 for i in range(7)]
+plt_markers = ["o", "s", "v", "D", "p", "^", "h", "X", "<", "P", "*", ">", "H", "d"] + [
+    i + 4 for i in range(7)
+]
 fit_param = Tuple[float, float, float]
 
 
@@ -94,7 +97,12 @@ def run_many(
 
     code_name = Code.__name__.split(".")[-1] if isinstance(Code, ModuleType) else Code
     decoder_name = Decoder.__name__.split(".")[-1] if isinstance(Decoder, ModuleType) else Code
-    error_names = "/".join([error.__name__.split(".")[-1] if isinstance(error, Error) else error for error in enabled_errors])
+    error_names = "/".join(
+        [
+            error.__name__.split(".")[-1] if isinstance(error, Error) else error
+            for error in enabled_errors
+        ]
+    )
 
     if output == "":
         output = f"{code_name}_{decoder_name}-{error_names}.csv"
@@ -111,8 +119,9 @@ def run_many(
 
     # Simulate and save results to file
     for size in sizes:
-
-        code, decoder = initialize(size, Code, Decoder, enabled_errors, faulty_measurements, **kwargs)
+        code, decoder = initialize(
+            size, Code, Decoder, enabled_errors, faulty_measurements, **kwargs
+        )
 
         for error_rate in error_rates:
             print(f"Running ({size}) lattice with error rates {error_rate}.")
@@ -139,7 +148,7 @@ def run_many(
 
             pprint(result)
 
-            data = data.append(result, ignore_index=True)
+            data = pd.concat([data, pd.DataFrame([result])], ignore_index=True)
 
             if output != "none":
                 data.to_csv(output_path)
@@ -185,12 +194,12 @@ class ThresholdFit:
         def fit(PL, pth, A, B, C, D, nu, mu):
             p, L = PL
             x = (p - pth) * L ** (1 / nu)
-            return A + B * x + C * x ** 2
+            return A + B * x + C * x**2
 
         def fit_modified(PL, pth, A, B, C, D, nu, mu):
             p, L = PL
             x = (p - pth) * L ** (1 / nu)
-            return A + B * x + C * x ** 2 + D * L ** (-1 / mu)
+            return A + B * x + C * x**2 + D * L ** (-1 / mu)
 
         return fit_modified if self.modified_ansatz else fit
 
@@ -300,12 +309,11 @@ class ThresholdFit:
 
         sizes = sorted(list(set(data["size"])))
 
-        colors = [f"C{i%10}" for i, size in enumerate(sizes)]
+        colors = [f"C{i % 10}" for i, size in enumerate(sizes)]
         markers = [plt_markers[i % len(plt_markers)] for i, size in enumerate(sizes)]
         legend_items = []
 
         for size, color, marker in zip(sizes, colors, markers):
-
             size_data = data.loc[data["size"] == size]
 
             x_data = size_data[column]
@@ -322,7 +330,9 @@ class ThresholdFit:
             axis.scatter(x_data, y_data, s=s_data, color=color, marker=marker, **scatter_kwargs)
             axis.plot(fit_x_data, fit_y_data, color=color, **line_kwargs)
 
-            legend_items.append(Line2D([], [], label=f"L = {size}", color=color, marker=marker, **line_kwargs))
+            legend_items.append(
+                Line2D([], [], label=f"L = {size}", color=color, marker=marker, **line_kwargs)
+            )
 
         for attribute, value in axis_attributes.items():
             getattr(axis, f"set_{attribute}")(value)

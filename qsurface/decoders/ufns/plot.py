@@ -1,6 +1,8 @@
 from ...codes.elements import AncillaQubit, DataQubit, Edge
-from .sim import Toric as SimToric, Planar as SimPlanar
-from ..unionfind.plot import Toric as PlotToric, Planar as PlotPlanar
+from ..unionfind.plot import Planar as PlotPlanar
+from ..unionfind.plot import Toric as PlotToric
+from .sim import Planar as SimPlanar
+from .sim import Toric as SimToric
 
 
 class Toric(PlotToric, SimToric):

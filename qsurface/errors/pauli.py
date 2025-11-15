@@ -1,7 +1,8 @@
-from ..codes.elements import Qubit
-from ._template import Sim as TemplateSim, Plot as TemplatePlot
-from typing import Optional
 import random
+
+from ..codes.elements import Qubit
+from ._template import Plot as TemplatePlot
+from ._template import Sim as TemplateSim
 
 
 class Sim(TemplateSim):

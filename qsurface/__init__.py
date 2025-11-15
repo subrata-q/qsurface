@@ -1,8 +1,3 @@
-from . import decoders
-from . import codes
-from . import errors
-from . import plot
-from . import main
-from . import threshold
+from . import codes, decoders, errors, main, plot, threshold
 
 __version__ = "0.1.5"

@@ -1,6 +1,6 @@
-from ..errors._icons import data_qubit_icon, ancilla_qubit_icon
-from .toric.sim import PerfectMeasurements as Toric
+from ..errors._icons import ancilla_qubit_icon, data_qubit_icon
 from .planar.sim import PerfectMeasurements as Planar
+from .toric.sim import PerfectMeasurements as Toric
 
 
 def toric_icons(code: Toric, z: float = 0, **kwargs):
@@ -9,10 +9,14 @@ def toric_icons(code: Toric, z: float = 0, **kwargs):
     for y in range(code.size[1]):
         for x in range(code.size[0]):
             surface += ancilla_qubit_icon(code.ancilla_qubits[z][(x, y)], **kwargs)
-            surface += data_qubit_icon(code.data_qubits[z][(x + 0.5, y)], instance=code.instance, **kwargs)
+            surface += data_qubit_icon(
+                code.data_qubits[z][(x + 0.5, y)], instance=code.instance, **kwargs
+            )
         surface += "\n"
         for x in range(code.size[0]):
-            surface += data_qubit_icon(code.data_qubits[z][(x, y + 0.5)], instance=code.instance, **kwargs)
+            surface += data_qubit_icon(
+                code.data_qubits[z][(x, y + 0.5)], instance=code.instance, **kwargs
+            )
             surface += ancilla_qubit_icon(code.ancilla_qubits[z][(x + 0.5, y + 0.5)], **kwargs)
         surface += "\n"
     print(surface)
@@ -25,14 +29,22 @@ def planar_icons(code: Planar, z: float = 0, **kwargs):
         surface += data_qubit_icon(code.data_qubits[z][(0.5, y)], **kwargs)
         for x in range(1, code.size[0]):
             surface += ancilla_qubit_icon(code.ancilla_qubits[z][(x, y)], **kwargs)
-            surface += data_qubit_icon(code.data_qubits[z][(x + 0.5, y)], instance=code.instance, **kwargs)
+            surface += data_qubit_icon(
+                code.data_qubits[z][(x + 0.5, y)], instance=code.instance, **kwargs
+            )
         surface += "\n" + ancilla_qubit_icon(code.ancilla_qubits[z][(0.5, y + 0.5)], **kwargs)
         for x in range(1, code.size[0]):
-            surface += data_qubit_icon(code.data_qubits[z][(x, y + 0.5)], instance=code.instance, **kwargs)
+            surface += data_qubit_icon(
+                code.data_qubits[z][(x, y + 0.5)], instance=code.instance, **kwargs
+            )
             surface += ancilla_qubit_icon(code.ancilla_qubits[z][(x + 0.5, y + 0.5)], **kwargs)
         surface += "\n"
-    surface += data_qubit_icon(code.data_qubits[z][(0.5, code.size[1] - 1)], instance=code.instance, **kwargs)
+    surface += data_qubit_icon(
+        code.data_qubits[z][(0.5, code.size[1] - 1)], instance=code.instance, **kwargs
+    )
     for x in range(1, code.size[0]):
         surface += ancilla_qubit_icon(code.ancilla_qubits[z][(x, code.size[1] - 1)], **kwargs)
-        surface += data_qubit_icon(code.data_qubits[z][(x + 0.5, code.size[1] - 1)], instance=code.instance, **kwargs)
+        surface += data_qubit_icon(
+            code.data_qubits[z][(x + 0.5, code.size[1] - 1)], instance=code.instance, **kwargs
+        )
     print(surface, "\n")

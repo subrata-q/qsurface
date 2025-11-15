@@ -1,8 +1,10 @@
-from qsurface.main import *
-import qsurface as oss
-import matplotlib as mpl
-import pytest
 import random
+
+import pytest
+
+import qsurface as oss
+from qsurface.main import *
+
 from .variables import *
 
 ITERS = 100
@@ -21,11 +23,15 @@ no_wait_param = oss.plot.PlotParams(blocking_wait=0.001)
 def test_ufns_sim(size, Code, errors, faulty, max_rate, extra_keys):
     """Test initialize function for all configurations."""
 
-    Decoder_module = getattr(oss.decoders, "ufns").sim
+    Decoder_module = oss.decoders.ufns.sim
     if hasattr(Decoder_module, Code.capitalize()):
         decoder_module = getattr(Decoder_module, Code.capitalize())
         Code_module = getattr(oss.codes, Code).sim
-        code_module = getattr(Code_module, "FaultyMeasurements") if faulty else getattr(Code_module, "PerfectMeasurements")
+        code_module = (
+            Code_module.FaultyMeasurements
+            if faulty
+            else Code_module.PerfectMeasurements
+        )
         code = code_module(size)
         code.initialize(*errors)
         decoder = decoder_module(code)

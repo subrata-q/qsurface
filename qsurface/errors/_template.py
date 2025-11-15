@@ -1,8 +1,11 @@
 from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from ..codes.elements import Qubit
-from matplotlib import pyplot as plt
 from functools import wraps
+
+from matplotlib import pyplot as plt
+
+from ..codes.elements import Qubit
 
 
 class Sim(ABC):
@@ -27,7 +30,7 @@ class Sim(ABC):
         self.type = str(self.__module__).split(".")[-1]
 
     def __repr__(self) -> str:
-        return "{} error object with defaults: {}".format(self.type, self.default_error_rates)
+        return f"{self.type} error object with defaults: {self.default_error_rates}"
 
     @abstractmethod
     def random_error(self, qubit: Qubit, **kwargs) -> None:
@@ -190,7 +193,8 @@ class Plot(Sim):
 
             if artist in figure.temporary_saved:
                 restored_properties = {
-                    prop: figure.temporary_saved[artist].get(prop, plt.getp(artist, prop)) for prop in properties
+                    prop: figure.temporary_saved[artist].get(prop, plt.getp(artist, prop))
+                    for prop in properties
                 }
             else:
                 restored_properties = {prop: plt.getp(artist, prop) for prop in properties}

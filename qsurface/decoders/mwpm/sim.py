@@ -1,11 +1,13 @@
-from typing import List, Tuple
-from qsurface.codes.elements import AncillaQubit
-from .._template import Sim
-import networkx as nx
-from numpy.ctypeslib import ndpointer
 import ctypes
 import os
+from typing import List, Tuple
 
+import networkx as nx
+from numpy.ctypeslib import ndpointer
+
+from qsurface.codes.elements import AncillaQubit
+
+from .._template import Sim
 
 LA = List[AncillaQubit]
 
@@ -136,7 +138,9 @@ class Toric(Sim):
             nodes2[i] = edges[i][1]
             weights[i] = edges[i][2]
 
-        matching = PMlib.pyMatching(ctypes.c_int(num_nodes), ctypes.c_int(numEdges), nodes1, nodes2, weights)
+        matching = PMlib.pyMatching(
+            ctypes.c_int(num_nodes), ctypes.c_int(numEdges), nodes1, nodes2, weights
+        )
         return [[i0, i1] for i0, i1 in enumerate(matching) if i0 > i1]
 
     @staticmethod

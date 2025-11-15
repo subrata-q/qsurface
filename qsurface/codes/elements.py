@@ -1,7 +1,7 @@
-from abc import ABC
 import random
-from typing import Optional, Tuple, Union
+from abc import ABC
 from collections import defaultdict
+from typing import Optional, Tuple, Union
 
 
 class Qubit(ABC):
@@ -156,7 +156,7 @@ class AncillaQubit(Qubit):
         return parity
 
 
-class Edge(object):
+class Edge:
     """A state object belonging to a `~.codes.elements.DataQubit` object.
 
     An edge cannot have open vertices and must be spanned by two nodes. In this case, the two nodes must be `~.codes.elements.AncillaQubit` objects, and are stored in ``self.nodes``.
@@ -200,7 +200,7 @@ class Edge(object):
         return self.state
 
     def __repr__(self):
-        return "e{}{}{}|{}".format(self.state_type, self.rep, self.qubit.loc, self.qubit.z)
+        return f"e{self.state_type}{self.rep}{self.qubit.loc}|{self.qubit.z}"
 
     @property
     def nodes(self):
@@ -217,7 +217,7 @@ class Edge(object):
             if len(self._nodes) == 2:
                 self._nodes == tuple(self._nodes)
         else:
-            raise ValueError("This edge already has two nodes: {}".format(self._nodes))
+            raise ValueError(f"This edge already has two nodes: {self._nodes}")
 
 
 class PseudoQubit(AncillaQubit):

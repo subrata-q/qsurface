@@ -1,8 +1,9 @@
-from qsurface.main import *
 import matplotlib as mpl
 import pytest
-from .variables import *
 
+from qsurface.main import *
+
+from .variables import *
 
 backends = ["TkAgg", "Qt5Agg"]
 

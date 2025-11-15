@@ -1,5 +1,7 @@
 from qsurface.codes.elements import AncillaQubit
-from ..toric.sim import PerfectMeasurements as ToricPM, FaultyMeasurements as ToricFM
+
+from ..toric.sim import FaultyMeasurements as ToricFM
+from ..toric.sim import PerfectMeasurements as ToricPM
 
 
 class PerfectMeasurements(ToricPM):
@@ -36,7 +38,9 @@ class PerfectMeasurements(ToricPM):
 
         for x in range(self.size[0]):
             parity(self.add_pseudo_qubit((x + 0.5, -0.5), z=z, state_type="z", **kwargs))
-            parity(self.add_pseudo_qubit((x + 0.5, self.size[1] - 0.5), z=z, state_type="z", **kwargs))
+            parity(
+                self.add_pseudo_qubit((x + 0.5, self.size[1] - 0.5), z=z, state_type="z", **kwargs)
+            )
         for x in range(self.size[0]):
             for y in range(self.size[1] - 1):
                 parity(self.add_ancilla_qubit((x + 0.5, y + 0.5), z=z, state_type="z", **kwargs))
@@ -65,8 +69,14 @@ class PerfectMeasurements(ToricPM):
     def init_logical_operator(self, **kwargs):
         """Initiates the logical operators [x,z] of the planar code."""
         operators = {
-            "x": [self.data_qubits[self.decode_layer][(0.5, i)].edges["x"] for i in range(self.size[0])],
-            "z": [self.data_qubits[self.decode_layer][(i + 0.5, 0)].edges["z"] for i in range(self.size[1])],
+            "x": [
+                self.data_qubits[self.decode_layer][(0.5, i)].edges["x"]
+                for i in range(self.size[0])
+            ],
+            "z": [
+                self.data_qubits[self.decode_layer][(i + 0.5, 0)].edges["z"]
+                for i in range(self.size[1])
+            ],
         }
         self.logical_operators = operators
 

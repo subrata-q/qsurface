@@ -1,6 +1,3 @@
-from . import _template
-from . import mwpm
-from . import unionfind
-from . import ufns
+from . import _template, mwpm, ufns, unionfind
 
 DECODERS = ["mwpm", "unionfind", "ufns"]
