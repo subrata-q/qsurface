@@ -22,7 +22,6 @@ no_wait_param = oss.plot.PlotParams(blocking_wait=0.001)
 )
 def test_ufns_sim(size, Code, errors, faulty, max_rate, extra_keys):
     """Test initialize function for all configurations."""
-
     Decoder_module = oss.decoders.ufns.sim
     if hasattr(Decoder_module, Code.capitalize()):
         decoder_module = getattr(Decoder_module, Code.capitalize())

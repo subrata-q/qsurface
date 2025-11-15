@@ -21,6 +21,9 @@ MP_ITERS = 24
 )
 def test_initialize(size, Code, Decoder, error, faulty):
     """Test initialize function for all configurations."""
+    # Skip unsupported decoder+code combinations
+    if Code == "rotated" and Decoder == "mwpm":
+        pytest.skip(f"Decoder '{Decoder}' does not support code type '{Code}'")
     initialize(size, Code, Decoder, enabled_errors=[error], faulty_measurements=faulty)
 
 
@@ -36,6 +39,9 @@ def test_initialize(size, Code, Decoder, error, faulty):
 )
 def test_initialize_plot(size, Code, faulty, figure3d):
     """Test all code figures configurations."""
+    # Skip unsupported decoder+code combinations
+    if Code == "rotated" and DECODERS[0] == "mwpm":
+        pytest.skip(f"Decoder '{DECODERS[0]}' does not support code type '{Code}'")
     code, decoder = initialize(
         size,
         Code,

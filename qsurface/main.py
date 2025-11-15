@@ -89,7 +89,15 @@ def initialize(
     if isinstance(Decoder, str):
         Decoder = getattr(decoders, Decoder)
     Decoder_flow = Decoder.plot if plotting else Decoder.sim
-    Decoder_flow_code = getattr(Decoder_flow, Code.__name__.split(".")[-1].capitalize())
+
+    code_name = Code.__name__.split(".")[-1].capitalize()
+    if not hasattr(Decoder_flow, code_name):
+        raise ValueError(
+            f"Decoder '{Decoder.__name__}' does not support code type '{code_name}'. "
+            f"Available code types: {[name for name in dir(Decoder_flow) if name[0].isupper() and not name.startswith('_')]}"
+        )
+
+    Decoder_flow_code = getattr(Decoder_flow, code_name)
 
     code = Code_flow_dim(size, **kwargs)
     code.initialize(*enabled_errors, **kwargs)

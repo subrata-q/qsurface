@@ -478,14 +478,18 @@ class Toric(Sim):
             key, (new_ancilla, edge) = leaf
             if ancilla.syndrome:
                 self.flip_edge(ancilla, edge, new_ancilla)
-                if type(key) is not int:
-                    self.correct_edge(
-                        self.code.ancilla_qubits[self.code.decode_layer][ancilla.loc], key
-                    )
+                if type(key) is not int and not isinstance(ancilla, PseudoQubit):
+                    self.correct_edge(self.code.ancilla_qubits[self.code.decode_layer][ancilla.loc], key)
+                ancilla.peeled = self.code.instance
+                # Don't recurse to PseudoQubits - they'll be handled separately in Planar.peel_clusters
+                if not isinstance(new_ancilla, PseudoQubit):
+                    self.peel_leaf(cluster, new_ancilla)
             else:
                 self._edge_peel(edge, variant="peel")
-            ancilla.peeled = self.code.instance
-            self.peel_leaf(cluster, new_ancilla)
+                ancilla.peeled = self.code.instance
+                # Don't recurse to PseudoQubits - they'll be handled separately in Planar.peel_clusters
+                if not isinstance(new_ancilla, PseudoQubit):
+                    self.peel_leaf(cluster, new_ancilla)
 
     def find_leaf(self, cluster: Cluster, ancilla: AncillaQubit, **kwargs):
         num_connect, leaf = 0, ()
