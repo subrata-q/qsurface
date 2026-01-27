@@ -1,5 +1,17 @@
 
-# Qsurface
+# Qsurface (Fork)
+
+> **Note**: This is a fork of the original [qsurface](https://github.com/watermarkhu/qsurface) project by Mark Shui Hu.
+> Original work licensed under BSD-3 License.
+
+## Changes from Original
+
+- **Fixed z-type ancilla qubit positioning**: Corrected rotation to properly center at dashed line intersections
+- **Updated Python support**: Increased minimum Python version to 3.8+
+- **Updated dependencies**: Modernized all package dependencies to recent stable versions
+- **Cleaned up configuration**: Simplified setup.py with minimal author/project info
+
+---
 
 [![PyPI version](https://img.shields.io/pypi/v/qsurface?color=blue)](https://pypi.org/project/qsurface/)
 ![Build](https://github.com/watermarkhu/qsurface/workflows/Build/badge.svg)
@@ -42,9 +54,9 @@ pip install qsurface
 
 ## Requirements
 
-* Python 3.7+
+* Python 3.8+
 * [Tkinter](https://docs.python.org/3/library/tkinter.html) or [PyQt5](https://riverbankcomputing.com/software/pyqt/intro) for interactive plotting.
-* Matplotlib 3.4+ for plotting on a 3D lattice
+* Matplotlib 3.5+ for plotting on a 3D lattice
 
 ### MWPM decoder
 

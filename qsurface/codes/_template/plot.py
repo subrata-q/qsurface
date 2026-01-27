@@ -150,7 +150,8 @@ class PerfectMeasurements(TemplateSimPM):
             if self.interactive:
                 self.interact_axes["error_buttons"] = plt.axes(self.params.axis_radio)
                 self.interact_bodies["error_buttons"] = RadioButtons(
-                    self.interact_axes["error_buttons"], ["info"] + list(self.error_methods.keys())
+                    self.interact_axes["error_buttons"],
+                    ["info"] + list(self.error_methods.keys()),
                 )
                 self.interact_axes["error_buttons"].active = False
 
@@ -208,7 +209,9 @@ class PerfectMeasurements(TemplateSimPM):
                 for param_name, name in error.legend_titles.items():
                     if param_name not in item_names:
                         self.lh.append(
-                            self._legend_circle(name, **getattr(self.params, param_name))
+                            self._legend_circle(
+                                name, **getattr(self.params, param_name)
+                            )
                         )
                         item_names.append(name)
 
@@ -230,10 +233,16 @@ class PerfectMeasurements(TemplateSimPM):
             ]
             self.lh += legend_items
             labels = [
-                artist.get_label() if hasattr(artist, "get_label") else artist[0].get_label()
+                (
+                    artist.get_label()
+                    if hasattr(artist, "get_label")
+                    else artist[0].get_label()
+                )
                 for artist in self.lh
             ]
-            self.legend_ax.legend(handles=self.lh, labels=labels, **kwargs.get("legend_kwargs", {}))
+            self.legend_ax.legend(
+                handles=self.lh, labels=labels, **kwargs.get("legend_kwargs", {})
+            )
 
         def _pick_handler(self, event):
             """Function on when an object in the figure is picked
@@ -246,7 +255,9 @@ class PerfectMeasurements(TemplateSimPM):
             else:
                 qubit = event.artist.object
                 print(selected, qubit)
-                self.error_methods[selected](qubit, instance=self.code.instance, temporary=True)
+                self.error_methods[selected](
+                    qubit, instance=self.code.instance, temporary=True
+                )
 
         def _plot_surface(self, z: float = 0, **kwargs):
             for qubit in self.code.data_qubits[z].values():
@@ -254,7 +265,9 @@ class PerfectMeasurements(TemplateSimPM):
             for qubit in self.code.ancilla_qubits[z].values():
                 self._plot_ancilla(qubit, z=z)
 
-        def _plot_ancilla(self, qubit: AncillaQubit, z: Optional[float] = None, **kwargs):
+        def _plot_ancilla(
+            self, qubit: AncillaQubit, z: Optional[float] = None, **kwargs
+        ):
             """plots an ancilla-qubit.
 
             For an ancilla-qubit, a `matplotlib.patches.Rectangle` object is plotted. Based on the type of ancilla, the patch is rotated at a 45 degree angle. Additionally, a line is plotted towards each of the data-qubits in ``self.parity_qubits`` that represent the edges of the graph.
@@ -276,7 +289,10 @@ class PerfectMeasurements(TemplateSimPM):
                     x - self.params.patch_rectangle_2d / 2,
                     y - self.params.patch_rectangle_2d / 2,
                 ),
-                "z": lambda x, y: (x, y - self.params.patch_rectangle_2d * 2 ** (1 / 2) / 2),
+                "z": lambda x, y: (
+                    x,
+                    y - self.params.patch_rectangle_2d / 2,
+                ),
             }
 
             # Plot graph edges
@@ -303,13 +319,14 @@ class PerfectMeasurements(TemplateSimPM):
                 loc_parse[qubit.state_type](*qubit.loc),
                 self.params.patch_rectangle_2d,
                 self.params.patch_rectangle_2d,
-                rotations[qubit.state_type],
                 picker=self.params.blocking_pick_radius,
                 zorder=1,
                 lw=self.params.line_width_primary,
                 z=z,
                 **getattr(self.params, f"{qubit.state_type}ancilla0"),
             )
+            # Apply rotation after creating the rectangle
+            rectangle.set_angle(rotations[qubit.state_type])
             qubit.surface_plot = rectangle
             rectangle.object = qubit  # Save qubit to artist
 
@@ -379,7 +396,11 @@ class PerfectMeasurements(TemplateSimPM):
             circle.object = qubit  # Save qubit to artist
 
         def _update_data(
-            self, qubit: DataQubit, artist: Optional[Artist] = None, temporary=False, **kwargs
+            self,
+            qubit: DataQubit,
+            artist: Optional[Artist] = None,
+            temporary=False,
+            **kwargs,
         ):
             """Update properties of data qubit plot.
 
@@ -422,7 +443,9 @@ class FaultyMeasurements(PerfectMeasurements, TemplateSimFM):
     def __init__(self, *args, figure3d: bool = True, **kwargs) -> None:
         self.figure3d = figure3d
         TemplateSimFM.__init__(self, *args, **kwargs)
-        self.figure = self.Figure3D(self, **kwargs) if figure3d else self.Figure2D(self, **kwargs)
+        self.figure = (
+            self.Figure3D(self, **kwargs) if figure3d else self.Figure2D(self, **kwargs)
+        )
 
     def random_errors(self, **kwargs):
         # Inherited docstring
@@ -447,7 +470,9 @@ class FaultyMeasurements(PerfectMeasurements, TemplateSimFM):
         """Update plots of all data-qubits in ``self.layer``. A plot iteration is added if a ``iter_name`` is supplied. See `.plot.Template2D.draw_figure`."""
         for qubit in self.data_qubits[self.layer].values():
             artist = (
-                qubit.surface_plot if self.figure3d else self.data_qubits[0][qubit.loc].surface_plot
+                qubit.surface_plot
+                if self.figure3d
+                else self.data_qubits[0][qubit.loc].surface_plot
             )
             self.figure._update_data(qubit, artist, **kwargs)
         if iter_name:
