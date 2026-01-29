@@ -10,6 +10,8 @@
 - **Updated Python support**: Increased minimum Python version to 3.8+
 - **Updated dependencies**: Modernized all package dependencies to recent stable versions
 - **Cleaned up configuration**: Simplified setup.py with minimal author/project info
+- **Added SVG Visualization**: Replaced terminal drawing with high-quality SVG/PNG output, supporting round-based steps and 3D faulty measurement simulation
+- **Added demo scripts**: Added demo scripts to showcase the capabilities of Qsurface
 
 ---
 
