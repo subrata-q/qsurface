@@ -30,6 +30,8 @@ dependencies = [
     "pandas>=2.0.0",
     "scipy>=1.10.0",
     "pptree>=3.1",
+    "drawsvg>=1.0.0",
+    "cairosvg>=2.0.0",
 ]
 
 [project.optional-dependencies]
