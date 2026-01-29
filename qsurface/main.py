@@ -248,7 +248,9 @@ def run_multiprocess(
         Keyword arguments are passed on to every process of run.
     """
     if hasattr(code, "figure"):
-        raise TypeError("Cannot use surface code with plotting enabled for multiprocess.")
+        raise TypeError(
+            "Cannot use surface code with plotting enabled for multiprocess."
+        )
 
     if processes is None:
         processes = cpu_count()
@@ -320,7 +322,9 @@ def run_multiprocess(
                         else:
                             combined_benchmark[name] = value
             for name, meanstd in stats.items():
-                mean, std = _combine_mean_std(meanstd["mean"], meanstd["std"], iterations)
+                mean, std = _combine_mean_std(
+                    meanstd["mean"], meanstd["std"], iterations
+                )
                 combined_benchmark[f"{name}mean"] = mean
                 combined_benchmark[f"{name}std"] = std
             output["benchmark"] = combined_benchmark
@@ -417,7 +421,10 @@ class BenchmarkDecoder:
     value_decorators = ["count_calls"]
 
     def __init__(
-        self, methods_to_benchmark: dict = {}, decoder: Optional[decoder_type] = None, **kwargs
+        self,
+        methods_to_benchmark: dict = {},
+        decoder: Optional[decoder_type] = None,
+        **kwargs,
     ):
         self.decoder = decoder
         self.methods_to_benchmark = methods_to_benchmark
@@ -427,7 +434,9 @@ class BenchmarkDecoder:
         if decoder:
             self._set_decoder(self, decoder, **kwargs)
 
-    def _set_decoder(self, decoder: decoder_type, seed: Optional[float] = None, **kwargs):
+    def _set_decoder(
+        self, decoder: decoder_type, seed: Optional[float] = None, **kwargs
+    ):
         """Sets the benchmarked decoder and wraps its class methods."""
         self.decoder = decoder
         self.data["seed"] = seed
@@ -445,7 +454,9 @@ class BenchmarkDecoder:
         decoder.decode = wrapper
 
         # Decorate decoder methods
-        decorator_names = ["value_to_list"] + self.list_decorators + self.value_decorators
+        decorator_names = (
+            ["value_to_list"] + self.list_decorators + self.value_decorators
+        )
         for handle_name, decorators in self.methods_to_benchmark.items():
             if isinstance(decorators, str):
                 decorators = [decorators]
@@ -543,7 +554,9 @@ def _combine_mean_std(
         n3 = n1 + n2
         m3 = (n1 * m1 + n2 * m2) / n3
         s3 = (
-            (n1 - 1) * s1**2 + (n2 - 1) * s2**2 + n1 * n2 / n3 * (m1**2 + m2**2 - 2 * m1 * m2)
+            (n1 - 1) * s1**2
+            + (n2 - 1) * s2**2
+            + n1 * n2 / n3 * (m1**2 + m2**2 - 2 * m1 * m2)
         ) / (n3 - 1)
         m1, s1, n1 = m3, s3, n3
 

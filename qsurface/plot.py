@@ -214,7 +214,9 @@ class BlockingKeyInput(BlockingInput):
     """
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, eventslist=("button_press_event", "key_press_event"), **kwargs)
+        super().__init__(
+            *args, eventslist=("button_press_event", "key_press_event"), **kwargs
+        )
 
     def __call__(self, timeout=30):
         """Blocking call to retrieve a single key press."""
@@ -398,7 +400,9 @@ class Template2D(ABC):
             self.block_box.axis("off")
             self.block_icon = self.block_box.scatter(0, 0, color="r")
         else:
-            self.main_ax = plt.axes(self.params.axis_main_non_interact, projection=self.projection)
+            self.main_ax = plt.axes(
+                self.params.axis_main_non_interact, projection=self.projection
+            )
 
         self.text_box = plt.axes(self.params.axis_text)
         self.text_box.axis("off")
@@ -442,7 +446,9 @@ class Template2D(ABC):
 
                 print(f"Matplotlib is using {backend} backend, which is not supported.")
             else:
-                print(f"Display {DISPLAY} not available. Interactive plotting is disabled.")
+                print(
+                    f"Display {DISPLAY} not available. Interactive plotting is disabled."
+                )
         return False
 
     def close(self):
@@ -689,7 +695,9 @@ class Template2D(ABC):
             if self.history_at_newest:
                 for artist, changes in self.future_dict.pop(new_iter_name, {}).items():
                     self.new_properties(artist, changes)
-                for artist, changes in self.future_dict.pop(self.history_iter + 1, {}).items():
+                for artist, changes in self.future_dict.pop(
+                    self.history_iter + 1, {}
+                ).items():
                     self.new_properties(artist, changes)
                 for artist, changes in self.history_dict[self.history_iter + 1].items():
                     self.change_properties(artist, changes)
@@ -743,7 +751,9 @@ class Template2D(ABC):
             # Save temporary changes
             if self.history_at_newest and self.temporary_changes:
                 for artist, properties in self.temporary_changes.items():
-                    self.new_properties(artist, properties, self.temporary_saved.pop(artist))
+                    self.new_properties(
+                        artist, properties, self.temporary_saved.pop(artist)
+                    )
                 self.temporary_changes = {}
 
             self.history_iter += direction
@@ -758,7 +768,9 @@ class Template2D(ABC):
 
     def _draw_next(self, *args, **kwargs) -> bool:
         """Redraws all changes from next plot iteration onto the plot."""
-        return self._draw_from_history(self.history_iter < self.history_iters, 1, **kwargs)
+        return self._draw_from_history(
+            self.history_iter < self.history_iters, 1, **kwargs
+        )
 
     def _draw_prev(self, *args, **kwargs) -> bool:
         """Redraws all changes from previous plot iteration onto the plot."""
@@ -803,7 +815,9 @@ class Template2D(ABC):
     -------------------------------------------------------------------------------
     """
 
-    def new_artist(self, artist: mpl.artist.Artist, axis: Optional[mpl.axes.Axes] = None) -> None:
+    def new_artist(
+        self, artist: mpl.artist.Artist, axis: Optional[mpl.axes.Axes] = None
+    ) -> None:
         """Adds a new artist to the ``axis``.
 
         Newly added artists must be hidden in the previous iteration. To make sure the history is properly logged, the visibility of the ``artist`` is set to ``False``, and a new property of shown visibility is added to the queue of the next iteration.
@@ -874,7 +888,9 @@ class Template2D(ABC):
 
         # If record exists, find difference in object properties
         for key, new_value in properties.items():
-            current_value = prev_prop.get(key, get_nested_property(plt.getp(artist, key)))
+            current_value = prev_prop.get(
+                key, get_nested_property(plt.getp(artist, key))
+            )
             next_prop.pop(key, None)
             if current_value != new_value:
                 prev_prop[key], next_prop[key] = current_value, new_value
@@ -900,7 +916,9 @@ class Template2D(ABC):
             self.temporary_changes[artist].update(properties)
             for prop_name in properties:
                 if prop_name not in self.temporary_saved[artist]:
-                    self.temporary_saved[artist][prop_name] = plt.getp(artist, prop_name)
+                    self.temporary_saved[artist][prop_name] = plt.getp(
+                        artist, prop_name
+                    )
             self.change_properties(artist, properties)
         else:
             print("Must be at newest iteration to apply changes.")
@@ -972,7 +990,7 @@ class Template3D(Template2D):
 
     def _draw_line(self, X, Y, *args, z: float = 0, **kwargs):
         artist = super()._draw_line(np.array(X), np.array(Y), *args, **kwargs)
-        art3d.line_2d_to_3d(artist, zs=z)
+        art3d.line_2d_to_3d(artist, zs=z * self.params.scale_3d_layer)
         return artist
 
     def _draw_line3D(self, X, Y, Z, *args, **kwargs):
@@ -982,10 +1000,10 @@ class Template3D(Template2D):
 
     def _draw_circle(self, *args, z: float = 0, **kwargs):
         artist = super()._draw_circle(*args, **kwargs)
-        art3d.patch_2d_to_3d(artist, z=z)
+        art3d.patch_2d_to_3d(artist, z=z * self.params.scale_3d_layer)
         return artist
 
     def _draw_rectangle(self, *args, z: float = 0, **kwargs):
         artist = super()._draw_rectangle(*args, **kwargs)
-        art3d.patch_2d_to_3d(artist, z=z)
+        art3d.patch_2d_to_3d(artist, z=z * self.params.scale_3d_layer)
         return artist

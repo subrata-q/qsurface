@@ -291,7 +291,7 @@ class PerfectMeasurements(TemplateSimPM):
                 ),
                 "z": lambda x, y: (
                     x,
-                    y - self.params.patch_rectangle_2d / 2,
+                    y - self.params.patch_rectangle_2d * 2 ** (1 / 2) / 2,
                 ),
             }
 
@@ -325,8 +325,9 @@ class PerfectMeasurements(TemplateSimPM):
                 z=z,
                 **getattr(self.params, f"{qubit.state_type}ancilla0"),
             )
-            # Apply rotation after creating the rectangle
-            rectangle.set_angle(rotations[qubit.state_type])
+            # Apply rotation after creating the rectangle (only for 2D patches)
+            if hasattr(rectangle, "set_angle"):
+                rectangle.set_angle(rotations[qubit.state_type])
             qubit.surface_plot = rectangle
             rectangle.object = qubit  # Save qubit to artist
 

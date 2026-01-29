@@ -1,4 +1,3 @@
-
 from ...codes.elements import AncillaQubit, DataQubit, Edge
 from ...plot import Template2D, Template3D
 from .._template import Plot
@@ -68,7 +67,11 @@ class Toric(SimToric, Plot):
     def place_bucket(self, place_list, bucket_i, **kwargs):
         # Inherited docstring
         ret = super().place_bucket(place_list, bucket_i, **kwargs)
-        if self.config["step_bucket"] and not self.config["step_cycle"] and bucket_i != -1:
+        if (
+            self.config["step_bucket"]
+            and not self.config["step_cycle"]
+            and bucket_i != -1
+        ):
             self.figure.draw_figure(f"Bucket {bucket_i} grown.")
         return ret
 
@@ -97,16 +100,28 @@ class Toric(SimToric, Plot):
     def _edge_full(self, ancilla, edge, new_ancilla, **kwargs):
         # Inherited docstring
         self.support[edge] = 2
-        if hasattr(edge, "uf_plot_instance") and edge.uf_plot_instance == self.code.instance:
-            if ancilla in edge.uf_plot and edge.uf_plot[ancilla].instance == self.code.instance:
-                self.figure._plot_half_edge(edge, new_ancilla, self.code.instance, full=True)
+        if (
+            hasattr(edge, "uf_plot_instance")
+            and edge.uf_plot_instance == self.code.instance
+        ):
+            if (
+                ancilla in edge.uf_plot
+                and edge.uf_plot[ancilla].instance == self.code.instance
+            ):
+                self.figure._plot_half_edge(
+                    edge, new_ancilla, self.code.instance, full=True
+                )
                 self.figure._plot_full_edge(edge, ancilla)
             else:
-                self.figure._plot_half_edge(edge, ancilla, self.code.instance, full=True)
+                self.figure._plot_half_edge(
+                    edge, ancilla, self.code.instance, full=True
+                )
                 self.figure._plot_full_edge(edge, new_ancilla)
         else:
             self.figure._plot_half_edge(edge, ancilla, self.code.instance, full=True)
-            self.figure._plot_half_edge(edge, new_ancilla, self.code.instance, full=True)
+            self.figure._plot_half_edge(
+                edge, new_ancilla, self.code.instance, full=True
+            )
 
     def _edge_grow(self, ancilla, edge, new_ancilla, **kwargs):
         # Inherited docsting
@@ -140,11 +155,20 @@ class Toric(SimToric, Plot):
             self.code = decoder.code
             self.decoder = name
             super().__init__(*args, **kwargs)
-            self.colors1 = {"x": self.params.color_x_primary, "z": self.params.color_z_primary}
-            self.colors2 = {"x": self.params.color_x_secondary, "z": self.params.color_z_secondary}
+            self.colors1 = {
+                "x": self.params.color_x_primary,
+                "z": self.params.color_z_primary,
+            }
+            self.colors2 = {
+                "x": self.params.color_x_secondary,
+                "z": self.params.color_z_secondary,
+            }
 
             size = [xy + 0.25 for xy in self.code.size]
             self._init_axis([-0.25, -0.25] + size, title=self.decoder, aspect="equal")
+
+            # Draw the detector graph in the background
+            self._draw_detector_graph()
 
             handles = [
                 self._legend_scatter(
@@ -181,10 +205,66 @@ class Toric(SimToric, Plot):
                 ),
             ]
             labels = [
-                artist.get_label() if hasattr(artist, "get_label") else artist[0].get_label()
+                (
+                    artist.get_label()
+                    if hasattr(artist, "get_label")
+                    else artist[0].get_label()
+                )
                 for artist in handles
             ]
             self.legend_ax.legend(handles, labels, **kwargs.pop("uf_legend_kwargs", {}))
+
+        def _draw_detector_graph(self):
+            """Draws the detector graph (lattice edges and ancillas) in the background."""
+            # Define line styles for the two types of ancillas
+            linestyles = {
+                "x": self.params.line_style_primary,
+                "z": self.params.line_style_secondary,
+            }
+            rotations = {"x": 0, "z": 45}
+            loc_parse = {
+                "x": lambda x, y: (
+                    x - self.params.patch_rectangle_2d / 2,
+                    y - self.params.patch_rectangle_2d / 2,
+                ),
+                "z": lambda x, y: (
+                    x,
+                    y - self.params.patch_rectangle_2d * 2 ** (1 / 2) / 2,
+                ),
+            }
+
+            # Draw edges (connections between ancillas and data qubits)
+            for ancilla in self.code.ancilla_qubits[0].values():
+                for key, data in ancilla.parity_qubits.items():
+                    self._draw_line(
+                        self.code._parse_boundary_coordinates(
+                            self.code.size[0], ancilla.loc[0], data.loc[0]
+                        ),
+                        self.code._parse_boundary_coordinates(
+                            self.code.size[1], ancilla.loc[1], data.loc[1]
+                        ),
+                        ls=linestyles[ancilla.state_type],
+                        zorder=-1,
+                        lw=self.params.line_width_primary,
+                        color=self.params.color_edge,
+                        alpha=0.3,  # Make it semi-transparent as background
+                    )
+
+            # Draw ancilla nodes
+            for ancilla in self.code.ancilla_qubits[0].values():
+                rectangle = self._draw_rectangle(
+                    loc_parse[ancilla.state_type](*ancilla.loc),
+                    self.params.patch_rectangle_2d,
+                    self.params.patch_rectangle_2d,
+                    edgecolor=self.params.color_qubit_edge,
+                    facecolor=self.params.color_qubit_face,
+                    linewidth=self.params.line_width_primary,
+                    zorder=-1,
+                    alpha=0.5,  # Make it semi-transparent as background
+                )
+                # Apply rotation after creating the rectangle (only for 2D patches)
+                if hasattr(rectangle, "set_angle"):
+                    rectangle.set_angle(rotations[ancilla.state_type])
 
         def _plot_half_edge(
             self,
@@ -201,7 +281,11 @@ class Toric(SimToric, Plot):
                 self.code._parse_boundary_coordinates(
                     self.code.size[0], edge.qubit.loc[1], ancilla.loc[1]
                 ),
-                ls=self.params.line_style_primary if full else self.params.line_style_tertiary,
+                ls=(
+                    self.params.line_style_primary
+                    if full
+                    else self.params.line_style_tertiary
+                ),
                 zorder=0,
                 lw=self.params.line_width_primary,
                 color=self.colors2[ancilla.state_type],
@@ -218,7 +302,9 @@ class Toric(SimToric, Plot):
 
         def _plot_full_edge(self, edge: Edge, ancilla: AncillaQubit):
             """Updates the line styles of the plot of an edge with support 2."""
-            self.new_properties(edge.uf_plot[ancilla], {"ls": self.params.line_style_primary})
+            self.new_properties(
+                edge.uf_plot[ancilla], {"ls": self.params.line_style_primary}
+            )
 
         def _hide_edge(self, edge: Edge):
             """Hides the plot of an edge after a peel or detected cycle."""
@@ -241,7 +327,10 @@ class Toric(SimToric, Plot):
                     x - self.params.patch_rectangle_2d / 2,
                     y - self.params.patch_rectangle_2d / 2,
                 ),
-                "z": lambda x, y: (x, y - self.params.patch_rectangle_2d * 2 ** (1 / 2) / 2),
+                "z": lambda x, y: (
+                    x,
+                    y - self.params.patch_rectangle_2d * 2 ** (1 / 2) / 2,
+                ),
             }
             # Plot ancilla object
             ancilla.uf_plot = self._draw_rectangle(
@@ -259,6 +348,8 @@ class Toric(SimToric, Plot):
             ancilla.uf_plot.object = ancilla
             if not init:
                 self.new_artist(ancilla.uf_plot)
+            if hasattr(ancilla.uf_plot, "set_angle"):
+                ancilla.uf_plot.set_angle(rotations[ancilla.state_type])
 
         def _flip_ancilla(self, ancilla: AncillaQubit):
             """Flips the state of the ancilla on the figure."""
@@ -320,7 +411,11 @@ class Toric(SimToric, Plot):
                     self.code.size[0], edge.qubit.loc[1], ancilla.loc[1]
                 ),
                 (edge_z, ancilla.z),
-                ls=self.params.line_style_primary if full else self.params.line_style_tertiary,
+                ls=(
+                    self.params.line_style_primary
+                    if full
+                    else self.params.line_style_tertiary
+                ),
                 zorder=0,
                 lw=self.params.line_width_primary,
                 color=self.colors2[ancilla.state_type],
