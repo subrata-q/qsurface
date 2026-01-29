@@ -30,6 +30,8 @@ setup(
         "scipy>=1.6.0",
         "pptree>=3.1",
         "numpy>=1.19.0",
+        "drawsvg",
+        "cairosvg",
     ],
     entry_points={
         "console_scripts": [

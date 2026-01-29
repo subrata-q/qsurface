@@ -52,7 +52,7 @@ All required packages can be installed through:
 
 ~~pip install qsurface~~
 ```bash
-pip install https://github.com/subrata-q/qsurface.git
+pip install git+https://github.com/subrata-q/qsurface.git
 ```
 
 ## Requirements

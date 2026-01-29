@@ -66,7 +66,7 @@ def draw_lattice_svg(
         rel_x = x - min_x
         rel_y = y - min_y
 
-        # Scale
+        # Scale x, y to SVG coordinates
         svg_x = padding + rel_x * unit_width
         # Flip Y: standard generic coordinates usually have Y going up, SVG has Y going down.
         # But let's check input coords. If they are matrix indices (row, col), Y goes down.
