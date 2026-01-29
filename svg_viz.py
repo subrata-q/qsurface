@@ -113,7 +113,7 @@ def draw_lattice_svg(
                     stroke_color = "#ff5e00ff"
                     stroke_width = 5
                 elif x_err and anc_type == "x":
-                    stroke_color = "#ff8c00ff"
+                    stroke_color = "#ffbf00ff"
                     stroke_width = 5
 
                 # Draw the connection
@@ -159,7 +159,7 @@ def draw_lattice_svg(
         )
 
         # Add label
-        label = "Z" if anc_type == "z" else "X"
+        label = "X" if anc_type == "z" else "Z"
         ancilla_group.append(
             draw.Text(
                 label, 10, ax, ay, center=True, fill="grey", dominant_baseline="middle"
@@ -229,7 +229,7 @@ def draw_lattice_svg(
             import cairosvg
 
             png_filename = filename_with_round.replace(".svg", ".png")
-            cairosvg.svg2png(url=filename_with_round, write_to=png_filename)
+            cairosvg.svg2png(url=filename_with_round, write_to=png_filename, scale=3)
             print(f"Saved PNG version to {png_filename}")
         except ImportError:
             print("Warning: cairosvg not installed. Install with: pip install cairosvg")
