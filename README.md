@@ -49,7 +49,8 @@ The compatibility of these decoders with the included surface codes are listed b
 All required packages can be installed through:
 
 ```bash
-pip install qsurface
+~~pip install qsurface~~
+pip install https://github.com/subrata-q/qsurface.git
 ```
 
 ## Requirements
