@@ -130,7 +130,13 @@ class AncillaQubit(Qubit):
     def state(self):
         return self.measure()
 
-    def measure(self, p_bitflip_plaq: float = 0, p_bitflip_star: float = 0, **kwargs) -> bool:
+    def measure(
+        self,
+        p_bitflip_plaq: float = 0,
+        p_bitflip_star: float = 0,
+        measurement_error: Optional[bool] = None,
+        **kwargs,
+    ) -> bool:
         """Applies a parity measurement on the ancilla.
 
         The functions loops over all the data qubits in ``self.parity_qubits``. For every edge associated with the entangled state on the data qubit, the value of a ``parity`` boolean is flipped.
@@ -141,14 +147,20 @@ class AncillaQubit(Qubit):
             Bitflip rate for plaquette (XXXX) operators.
         p_bitflip_star : float
             Bitflip rate for star (ZZZZ) operators.
+        measurement_error : bool
+            Whether an error occurred during the last measurement. Useful for injecting errors manually.
         """
         parity = False
         for data_qubit in self.parity_qubits.values():
             if data_qubit.state[self.state_type]:
                 parity = not parity
 
-        p_measure = p_bitflip_plaq if self.state_type == "x" else p_bitflip_star
-        self.measurement_error = p_measure != 0 and random.random() < p_measure
+        if measurement_error is None:
+            p_measure = p_bitflip_plaq if self.state_type == "x" else p_bitflip_star
+            self.measurement_error = p_measure != 0 and random.random() < p_measure
+        else:
+            self.measurement_error = measurement_error
+
         if self.measurement_error:
             parity = not parity
 

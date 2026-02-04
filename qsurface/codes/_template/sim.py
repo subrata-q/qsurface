@@ -133,7 +133,9 @@ class PerfectMeasurements(ABC):
         """Initiates the logical operators."""
         pass
 
-    def init_errors(self, *error_modules: Union[str, Error], error_rates: dict = {}, **kwargs):
+    def init_errors(
+        self, *error_modules: Union[str, Error], error_rates: dict = {}, **kwargs
+    ):
         """Initializes error modules.
 
         Any error module from :doc:`../errors/index` can loaded as either a string equivalent to the module file name or as the module itself. The default error rates for all loaded error modules can be supplied as a dictionary with keywords corresponding to the default error rates of the associated error modules.
@@ -275,7 +277,9 @@ class PerfectMeasurements(ABC):
         """
         self.instance = time.time()
         ordered_errors = (
-            [self.errors[name] for name in apply_order] if apply_order else self.errors.values()
+            [self.errors[name] for name in apply_order]
+            if apply_order
+            else self.errors.values()
         )
         for error_class in ordered_errors:
             for qubit in self.data_qubits[self.layer].values():
@@ -389,7 +393,9 @@ class FaultyMeasurements(PerfectMeasurements):
             Newer instance of ancilla-qubit.
         """
 
-        pseudo_edge = self._PseudoEdge(upper_ancilla, state_type=upper_ancilla.state_type)
+        pseudo_edge = self._PseudoEdge(
+            upper_ancilla, state_type=upper_ancilla.state_type
+        )
         upper_ancilla.z_neighbors[lower_ancilla] = pseudo_edge
         lower_ancilla.z_neighbors[upper_ancilla] = pseudo_edge
         pseudo_edge.nodes = [upper_ancilla, lower_ancilla]
@@ -404,6 +410,7 @@ class FaultyMeasurements(PerfectMeasurements):
         self,
         p_bitflip_plaq: Optional[float] = None,
         p_bitflip_star: Optional[float] = None,
+        m_err_list: Optional[List] = [],
         **kwargs,
     ):
         """Performs a round of parity measurements on layer `z` with faulty measurements.
@@ -424,7 +431,11 @@ class FaultyMeasurements(PerfectMeasurements):
         for z in range(self.layers - 1):
             self.layer = z
             self.random_errors_layer(**kwargs)
-            self.random_measure_layer(p_bitflip_plaq=p_bitflip_plaq, p_bitflip_star=p_bitflip_star)
+            self.random_measure_layer(
+                p_bitflip_plaq=p_bitflip_plaq,
+                p_bitflip_star=p_bitflip_star,
+                m_err_list=m_err_list,
+            )
         self.layer = self.layers - 1
         self.random_errors_layer(**kwargs)
         self.random_measure_layer()
@@ -438,20 +449,31 @@ class FaultyMeasurements(PerfectMeasurements):
             Keyword arguments are passed on to `~._template.sim.PerfectMeasurements.random_errors`.
         """
         for data in self.data_qubits[self.layer].values():
-            data.state = self.data_qubits[(self.layer - 1) % self.layers][data.loc].state
+            data.state = self.data_qubits[(self.layer - 1) % self.layers][
+                data.loc
+            ].state
         super().random_errors(**kwargs)
 
-    def random_measure_layer(self, **kwargs):
+    def random_measure_layer(self, m_err_list: list = [], **kwargs):
         """Measures a layer of ancillas.
 
         If the measured state of the current ancilla is not equal to the measured state of the previous instance, the current ancilla is a syndrome.
 
         Parameters
         ----------
+        m_err_list : list
+            List of tuples of (z, loc) where measurement errors should be injected manually.
         kwargs
             Keyword arguments are passed on to `~.codes.elements.AncillaQubit.get_state`.
         """
         for ancilla in self.ancilla_qubits[self.layer].values():
-            previous_ancilla = self.ancilla_qubits[(ancilla.z - 1) % self.layers][ancilla.loc]
-            measured_state = ancilla.measure(**kwargs)
+            previous_ancilla = self.ancilla_qubits[(ancilla.z - 1) % self.layers][
+                ancilla.loc
+            ]
+            measurement_error = any(
+                z == self.layer and loc == ancilla.loc for z, loc in m_err_list
+            )
+            measured_state = ancilla.measure(
+                measurement_error=measurement_error, **kwargs
+            )
             ancilla.syndrome = measured_state != previous_ancilla.measured_state
