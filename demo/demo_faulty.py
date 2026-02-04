@@ -1,6 +1,7 @@
 from qsurface.main import initialize
 from qsurface.svg_viz import draw_lattice_svg
 import random
+import json
 
 random.seed(40203)
 
@@ -27,8 +28,7 @@ draw_lattice_svg(code, filename="faulty_initial.svg", round_index=0, save_png=Fa
 
 print(f"\nRunning simulation for {num_rounds} rounds (3D block)...")
 
-# 1. Introduce errors (Simulates all layers)
-# In FaultyMeasurements, random_errors runs through all 'layers' steps.
+
 print("\nSyndrome during error injection before decoding:")
 
 
@@ -37,6 +37,7 @@ code.random_errors(
 )
 
 syndromes = decoder.get_syndrome()
+syndromes_before_decode = syndromes
 print(f"X-type syndromes: {syndromes[0]}")
 print(f"Z-type syndromes: {syndromes[1]}")
 
@@ -131,6 +132,9 @@ total_corrections = (
 )
 print(f"\nTotal qubits corrected: {total_corrections}")
 
+code.logical_state
+print("Logical error occurred: ", not code.no_error)
+
 with open("corrections.txt", "w") as f:
     f.write("X-corrections\n(x, y, round):\n")
     for loc in corrections_x[it]:
@@ -146,5 +150,23 @@ with open("corrections.txt", "w") as f:
         f.write(f"({x}, {y}, {int(it)})\n")
 
 
-code.logical_state
-print("Logical error occurred: ", not code.no_error)
+# Construct the data structure for JSON export
+output_data = {
+    "syndromes": {
+        "X": [[s.loc[0], s.loc[1], int(s.z)] for s in syndromes_before_decode[0]],
+        "Z": [[s.loc[0], s.loc[1], int(s.z)] for s in syndromes_before_decode[1]],
+        "XZ": [],
+    },
+    "corrections": {
+        "X": [[loc[0], loc[1], int(it)] for loc in corrections_x[it]],
+        "Z": [[loc[0], loc[1], int(it)] for loc in corrections_z[it]],
+        "XZ": [[loc[0], loc[1], int(it)] for loc in corrections_both[it]],
+    },
+}
+
+
+# Save to results.json
+with open("results.json", "w") as f:
+    json.dump(output_data, f, indent=4)
+
+print("Saved all results to results.json")
