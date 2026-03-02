@@ -32,8 +32,21 @@ print(f"\nRunning simulation for {num_rounds} rounds (3D block)...")
 print("\nSyndrome during error injection before decoding:")
 
 
+# Explicitly set error rates for qubits
+explicit_probs = {
+    # (x, y): (p_bitflip, p_phaseflip)
+    (0, 0): (0.01, 0.01),
+    (1, 1): (0.04, 0.01),
+    (2, 1): (0.01, 0.05),
+    (3, 0): (0.0, 0.04),
+}
+
 code.random_errors(
-    p_bitflip=0.02, p_phaseflip=0.02, p_bitflip_plaq=0.01, p_bitflip_star=0.01
+    p_bitflip=0.0,
+    p_phaseflip=0.0,
+    p_bitflip_plaq=0.0,
+    p_bitflip_star=0.0,
+    explicit_qubit_error_probs=explicit_probs,  # optional
 )
 
 syndromes = decoder.get_syndrome()

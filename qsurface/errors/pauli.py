@@ -33,6 +33,10 @@ class Sim(TemplateSim):
             Overriding probability of Z-errors or phaseflip errors.
 
         """
+        explicit_qubit_error_probs = kwargs.get("explicit_qubit_error_probs", {})
+        if qubit.loc in explicit_qubit_error_probs:
+            p_bitflip, p_phaseflip = explicit_qubit_error_probs[qubit.loc]
+
         if p_bitflip is None:
             p_bitflip = self.default_error_rates["p_bitflip"]
         if p_phaseflip is None:
