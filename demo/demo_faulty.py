@@ -35,19 +35,23 @@ print("\nSyndrome during error injection before decoding:")
 # Explicitly set error rates for qubits
 explicit_probs = {
     # (x, y): (p_bitflip, p_phaseflip)
-    (0, 0): (0.01, 0.01),
-    (1, 1): (0.04, 0.01),
+    (0, 0): (0.09, 0.01),
+    (1, 1): (0.04, 0.08),
     (2, 1): (0.01, 0.05),
     (3, 0): (0.0, 0.04),
 }
 
 code.random_errors(
-    p_bitflip=0.0,
-    p_phaseflip=0.0,
-    p_bitflip_plaq=0.0,
-    p_bitflip_star=0.0,
+    p_bitflip=0.01,
+    p_phaseflip=0.01,
+    p_bitflip_plaq=0.01,
+    p_bitflip_star=0.01,
     explicit_qubit_error_probs=explicit_probs,  # optional
 )
+
+draw_lattice_svg(
+    code, filename="faulty_errors.svg", round_index=num_rounds - 1, save_png=False
+)  # draw after last round
 
 syndromes = decoder.get_syndrome()
 syndromes_before_decode = syndromes
