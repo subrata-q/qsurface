@@ -85,7 +85,9 @@ def read_config(path: Path, config_dict: Optional[dict] = None) -> dict:
     config.read(path)
 
     for section_name, section in config._sections.items():
-        section_config = config_dict if section_name == "main" else config_dict[section_name]
+        section_config = (
+            config_dict if section_name == "main" else config_dict[section_name]
+        )
         for key, item in section.items():
             try:
                 section_config[key] = ast.literal_eval(item)
@@ -150,7 +152,9 @@ class Sim(ABC):
         erasure=True,
     )
 
-    def __init__(self, code: PerfectMeasurements, check_compatibility: bool = False, **kwargs):
+    def __init__(
+        self, code: PerfectMeasurements, check_compatibility: bool = False, **kwargs
+    ):
         self.code = code
         self.config_file = Path(__file__).resolve().parent / "decoders.ini"
         self.config = init_config(self.config_file)[self.short]
@@ -181,7 +185,9 @@ class Sim(ABC):
         for name in self.code.errors:
             if name in self.compatibility_errors:
                 if not self.compatibility_errors[name]:
-                    print(f"❌ Error module <{name}> is not compatible with this decoder")
+                    print(
+                        f"❌ Error module <{name}> is not compatible with this decoder"
+                    )
                     compatible = False
             else:
                 print(f"❔ Error Module <{name}> compatibility unspecified")
@@ -190,7 +196,9 @@ class Sim(ABC):
             print("✅ This decoder is compatible with the code.")
 
     @staticmethod
-    def get_neighbor(ancilla_qubit: AncillaQubit, key: str) -> Tuple[AncillaQubit, Edge]:
+    def get_neighbor(
+        ancilla_qubit: AncillaQubit, key: str
+    ) -> Tuple[AncillaQubit, Edge]:
         """Returns the neighboring ancilla-qubit of ``ancilla_qubit`` in the direction of ``key``."""
         data_qubit = ancilla_qubit.parity_qubits[key]
         edge = data_qubit.edges[ancilla_qubit.state_type]
@@ -213,7 +221,9 @@ class Sim(ABC):
                 neighbors[ancilla.z - ancilla_qubit.z] = (ancilla, edge)
         return neighbors
 
-    def correct_edge(self, ancilla_qubit: AncillaQubit, key: str, **kwargs) -> AncillaQubit:
+    def correct_edge(
+        self, ancilla_qubit: AncillaQubit, key: str, **kwargs
+    ) -> AncillaQubit:
         """Applies a correction.
 
         The correction is applied to the data-qubit located at ``ancilla_qubit.parity_qubits[key]``. More specifically, the correction is applied to the `~.codes.elements.Edge` object corresponding to the ``state_type`` of ``ancilla_qubit``.
@@ -222,7 +232,9 @@ class Sim(ABC):
         edge.state = not edge.state
         return next_qubit
 
-    def get_syndrome(self, find_pseudo: bool = False) -> Union[Tuple[LA, LA], Tuple[LTAP, LTAP]]:
+    def get_syndrome(
+        self, find_pseudo: bool = False
+    ) -> Union[Tuple[LA, LA], Tuple[LTAP, LTAP]]:
         """Finds the syndrome of the code.
 
         Parameters
@@ -266,7 +278,9 @@ class Sim(ABC):
                     plaqs.append((ancilla, pseudo))
                 else:
                     if ancilla.loc[1] < self.code.size[1] / 2:
-                        pseudo = self.code.pseudo_qubits[ancilla.z][(ancilla.loc[0], -0.5)]
+                        pseudo = self.code.pseudo_qubits[ancilla.z][
+                            (ancilla.loc[0], -0.5)
+                        ]
                     else:
                         pseudo = self.code.pseudo_qubits[ancilla.z][
                             (ancilla.loc[0], self.code.size[1] - 0.5)
@@ -331,7 +345,9 @@ class Plot(Sim):
         if hasattr(qubit, "surface_lines"):
             self.plot_matching_edge(qubit.surface_lines.get(key, None))
         if hasattr(next_qubit, "surface_lines"):
-            self.plot_matching_edge(next_qubit.surface_lines.get(tuple([-i for i in key]), None))
+            self.plot_matching_edge(
+                next_qubit.surface_lines.get(tuple([-i for i in key]), None)
+            )
         return next_qubit
 
     def plot_matching_edge(self, line: Optional[Line2D] = None):
@@ -344,12 +360,12 @@ class Plot(Sim):
             state_type = line.object.state_type
             self.matching_lines[line] = not self.matching_lines[line]
             if self.matching_lines[line]:
-                self.code.figure.future_dict[iteration + 1][line] = self.line_color_match[
-                    state_type
-                ]
-                self.code.figure.future_dict[iteration + 2][line] = self.line_color_normal[
-                    state_type
-                ]
+                self.code.figure.future_dict[iteration + 1][line] = (
+                    self.line_color_match[state_type]
+                )
+                self.code.figure.future_dict[iteration + 2][line] = (
+                    self.line_color_normal[state_type]
+                )
             else:
                 self.code.figure.future_dict[iteration + 1].pop(line, None)
                 self.code.figure.future_dict[iteration + 2].pop(line, None)

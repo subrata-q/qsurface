@@ -16,11 +16,15 @@ class Sim(TemplateSim):
         Default probability of Z-errors or phaseflip errors.
     """
 
-    def __init__(self, *args, p_bitflip: float = 0, p_phaseflip: float = 0, **kwargs) -> None:
+    def __init__(
+        self, *args, p_bitflip: float = 0, p_phaseflip: float = 0, **kwargs
+    ) -> None:
         super().__init__(*args, **kwargs)
         self.default_error_rates = {"p_bitflip": p_bitflip, "p_phaseflip": p_phaseflip}
 
-    def random_error(self, qubit: Qubit, p_bitflip: float = 0, p_phaseflip: float = 0, **kwargs):
+    def random_error(
+        self, qubit: Qubit, p_bitflip: float = 0, p_phaseflip: float = 0, **kwargs
+    ):
         """Applies a Pauli error, bitflip and/or phaseflip.
 
         Parameters
@@ -34,8 +38,9 @@ class Sim(TemplateSim):
 
         """
         explicit_qubit_error_probs = kwargs.get("explicit_qubit_error_probs", {})
-        if qubit.loc in explicit_qubit_error_probs:
-            p_bitflip, p_phaseflip = explicit_qubit_error_probs[qubit.loc]
+        key = qubit.loc + (self.code.layer,)
+        if key in explicit_qubit_error_probs:
+            p_bitflip, p_phaseflip = explicit_qubit_error_probs[key]
 
         if p_bitflip is None:
             p_bitflip = self.default_error_rates["p_bitflip"]
