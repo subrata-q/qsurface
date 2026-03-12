@@ -159,7 +159,7 @@ def draw_lattice_svg(
         )
 
         # Add label
-        label = "X" if anc_type == "z" else "Z"
+        label = "Z" if anc_type == "z" else "X"
         ancilla_group.append(
             draw.Text(
                 label, 10, ax, ay, center=True, fill="grey", dominant_baseline="middle"
